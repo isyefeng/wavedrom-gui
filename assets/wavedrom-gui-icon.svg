@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">WaveDrom GUI Icon</title>
+  <desc id="desc">A timing waveform icon with a W mark for WaveDrom GUI.</desc>
+  <defs>
+    <linearGradient id="bg" x1="32" y1="24" x2="224" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#176b87"/>
+      <stop offset="1" stop-color="#0f4c5c"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#bg)"/>
+  <path d="M50 82h156" fill="none" stroke="#d8eef4" stroke-width="8" stroke-linecap="round" opacity=".28"/>
+  <path d="M50 128h156" fill="none" stroke="#d8eef4" stroke-width="8" stroke-linecap="round" opacity=".18"/>
+  <path d="M50 174h156" fill="none" stroke="#d8eef4" stroke-width="8" stroke-linecap="round" opacity=".28"/>
+  <path d="M52 168h26v-52h34v52h34v-52h34v52h24" fill="none" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M64 74l24 80 28-80 28 80 24-80" fill="none" stroke="#ffbf66" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="88" cy="154" r="8" fill="#ffbf66"/>
+  <circle cx="144" cy="154" r="8" fill="#ffbf66"/>
+  <circle cx="200" cy="168" r="8" fill="#ffffff"/>
+</svg>
