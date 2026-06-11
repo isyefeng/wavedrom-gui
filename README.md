@@ -19,6 +19,7 @@
 - 导出 WaveJSON（官网教程同款 JavaScript 对象语法）
 - 导出 SVG
 - 导出 PNG
+- 导入 WaveJSON（支持官网教程语法、严格 JSON、JSON5 风格对象字面量）
 - WaveDrom CDN 渲染，失败时使用内置 SVG 预览兜底
 - 白色/深色主题切换
 

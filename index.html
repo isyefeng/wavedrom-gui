@@ -168,11 +168,7 @@
             <span>foot.text</span>
             <input id="footText" placeholder="页脚文字" />
           </label>
-          <div class="button-row">
-            <button class="secondary" id="exportJson">导出 WaveJSON</button>
-            <button class="secondary" id="exportSvg">导出 SVG</button>
-            <button class="secondary" id="exportPng">导出 PNG</button>
-          </div>
+          <input type="file" id="importJsonInput" accept=".js,.json,.json5,text/javascript,application/json" hidden />
         </aside>
 
           <div class="workspace">
@@ -183,14 +179,24 @@
           <section class="preview-panel">
             <div class="panel-title">
               <span>实时预览</span>
-              <span class="render-status" id="renderStatus">检测渲染器...</span>
+              <div class="panel-actions">
+                <span class="render-status" id="renderStatus">检测渲染器...</span>
+                <button class="panel-button" id="exportSvg" title="导出当前预览为 SVG 文件">导出 SVG</button>
+                <button class="panel-button" id="exportPng" title="导出当前预览为 PNG 图片">导出 PNG</button>
+              </div>
             </div>
             <div id="wavePreview">
               <div id="WaveDrom_Display_0"></div>
             </div>
           </section>
           <section class="json-panel">
-            <div class="panel-title">WaveJSON（官网教程语法）</div>
+            <div class="panel-title">
+              <span>WaveJSON（官网教程语法）</span>
+              <div class="panel-actions">
+                <button class="panel-button" id="importJson" title="导入 WaveDrom 官网语法文件，支持 .js/.json/.json5">导入</button>
+                <button class="panel-button" id="exportJson" title="导出当前图形的 WaveJSON 文件">导出</button>
+              </div>
+            </div>
             <pre id="jsonOutput"></pre>
           </section>
         </div>

@@ -242,6 +242,7 @@ function cacheElements() {
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
+  els.importJsonInput = document.querySelector("#importJsonInput");
   els.donateDialog = document.querySelector("#donateDialog");
   els.renderStatus = document.querySelector("#renderStatus");
 
@@ -273,6 +274,8 @@ function bindEvents() {
   document.querySelector("#loadExample").addEventListener("click", loadSelectedExample);
   document.querySelector("#undoBtn").addEventListener("click", undo);
   document.querySelector("#redoBtn").addEventListener("click", redo);
+  document.querySelector("#importJson").addEventListener("click", () => els.importJsonInput.click());
+  els.importJsonInput.addEventListener("change", importWaveJson);
   document.querySelector("#exportJson").addEventListener("click", exportJson);
   document.querySelector("#exportSvg").addEventListener("click", exportSvg);
   document.querySelector("#exportPng").addEventListener("click", exportPng);
@@ -559,6 +562,38 @@ function loadSelectedExample() {
   commit();
   applySource(tutorialExamples[index].source, tutorialExamples[index].title);
   renderAll();
+}
+
+function importWaveJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const source = parseWaveJson(String(reader.result || ""));
+      commit();
+      applySource(source, file.name.replace(/\.[^.]+$/, "") || "Imported WaveJSON");
+      els.exampleSelect.value = "";
+      renderAll();
+    } catch (error) {
+      alert(`导入失败：${error.message}`);
+    } finally {
+      els.importJsonInput.value = "";
+    }
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+function parseWaveJson(text) {
+  const source = Function(`"use strict"; return (${text});`)();
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    throw new Error("根节点必须是对象，例如 { signal: [...] }");
+  }
+  if (!Array.isArray(source.signal) && !Array.isArray(source.assign) && !source.reg) {
+    throw new Error("缺少 signal、assign 或 reg 字段");
+  }
+  return source;
 }
 
 function toWaveDromSource() {
