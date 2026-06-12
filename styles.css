@@ -345,6 +345,13 @@ h1 {
   font-weight: 700;
 }
 
+.field small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 .field input,
 .field select,
 .field textarea {
@@ -414,6 +421,7 @@ h1 {
 }
 
 .cycle {
+  position: relative;
   display: grid;
   min-width: 72px;
   height: 58px;
@@ -423,6 +431,22 @@ h1 {
   background: transparent;
   color: var(--text);
   font-weight: 700;
+}
+
+.cycle[data-node]::after {
+  content: attr(data-node);
+  position: absolute;
+  right: 5px;
+  top: 4px;
+  display: grid;
+  min-width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.7rem;
+  line-height: 1;
 }
 
 .cycle.is-selected {
@@ -463,6 +487,129 @@ h1 {
 .preview-panel,
 .json-panel {
   padding: 16px;
+}
+
+.wave-help {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--bg);
+}
+
+.wave-help svg {
+  width: 96px;
+  height: 34px;
+  background: var(--surface);
+}
+
+.wave-help path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: square;
+}
+
+.wave-help polygon {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.wave-help strong,
+.wave-help span {
+  display: block;
+}
+
+.wave-help span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.edge-builder {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.field-title {
+  color: var(--muted);
+}
+
+.edge-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 8px;
+}
+
+.edge-grid input,
+.edge-grid select {
+  min-width: 0;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.edge-grid input:last-child {
+  grid-column: 1 / -1;
+}
+
+.edge-add {
+  width: max-content;
+}
+
+.edge-list {
+  display: grid;
+  gap: 6px;
+}
+
+.edge-empty,
+.edge-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: var(--bg);
+}
+
+.edge-empty {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.edge-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.edge-item span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edge-item button {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 800;
 }
 
 #wavePreview {

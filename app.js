@@ -1,6 +1,6 @@
 const state = {
   title: "Untitled Timing Diagram",
-  selected: { signal: 0, cycle: 0 },
+  selected: { signal: 0, cycle: 5 },
   config: { hscale: 1, skin: "default" },
   edge: [],
   foot: { text: "" },
@@ -234,17 +234,21 @@ function cacheElements() {
   els.docTitle = document.querySelector("#docTitle");
   els.exampleSelect = document.querySelector("#exampleSelect");
   els.waveType = document.querySelector("#waveType");
+  els.waveHelp = document.querySelector("#waveHelp");
   els.cycleLabel = document.querySelector("#cycleLabel");
   els.signalPeriod = document.querySelector("#signalPeriod");
   els.signalPhase = document.querySelector("#signalPhase");
-  els.signalNode = document.querySelector("#signalNode");
-  els.edgeText = document.querySelector("#edgeText");
+  els.cycleNode = document.querySelector("#cycleNode");
+  els.edgeFrom = document.querySelector("#edgeFrom");
+  els.edgeShape = document.querySelector("#edgeShape");
+  els.edgeTo = document.querySelector("#edgeTo");
+  els.edgeLabel = document.querySelector("#edgeLabel");
+  els.edgeList = document.querySelector("#edgeList");
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
   els.importJsonInput = document.querySelector("#importJsonInput");
   els.donateDialog = document.querySelector("#donateDialog");
-  els.renderStatus = document.querySelector("#renderStatus");
 
   tutorialExamples.forEach((example, index) => {
     const option = document.createElement("option");
@@ -309,19 +313,14 @@ function bindEvents() {
     renderAll();
   });
 
-  els.signalNode.addEventListener("input", (event) => {
+  els.cycleNode.addEventListener("input", (event) => {
     commit();
-    selectedSignal().node = event.target.value;
+    setNodeAt(selectedSignal(), state.selected.cycle, event.target.value.trim().slice(0, 1));
     state.rawSource = null;
     renderAll();
   });
 
-  els.edgeText.addEventListener("input", (event) => {
-    commit();
-    state.edge = event.target.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-    state.rawSource = null;
-    renderAll();
-  });
+  document.querySelector("#addEdge").addEventListener("click", addEdgeFromForm);
 
   els.hscaleInput.addEventListener("input", (event) => {
     commit();
@@ -413,6 +412,8 @@ function renderSignalTable() {
       cycle.textContent = signal.data[cycleIndex] || wave.toUpperCase();
       cycle.style.borderTop = `4px solid ${signal.color}`;
       cycle.title = `周期 ${cycleIndex + 1}`;
+      const node = getNodeAt(signal, cycleIndex);
+      if (node) cycle.dataset.node = node;
       cycle.classList.toggle(
         "is-selected",
         state.selected.signal === signalIndex && state.selected.cycle === cycleIndex,
@@ -476,11 +477,12 @@ function syncInspector() {
   els.cycleLabel.value = cycle.label;
   els.signalPeriod.value = signal.period || 1;
   els.signalPhase.value = signal.phase || 0;
-  els.signalNode.value = signal.node || "";
-  els.edgeText.value = (state.edge || []).join("\n");
+  els.cycleNode.value = getNodeAt(signal, state.selected.cycle);
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
+  renderWaveHelp(cycle.wave);
+  renderEdgeList();
 }
 
 function selectedSignal() {
@@ -541,7 +543,7 @@ function addSignal() {
     node: "",
   });
   state.rawSource = null;
-  state.selected = { signal: state.signals.length - 1, cycle: 0 };
+  state.selected = { signal: state.signals.length - 1, cycle: 3 };
   renderAll();
 }
 
@@ -550,9 +552,108 @@ function removeSignalAt(signalIndex) {
   commit();
   state.signals.splice(signalIndex, 1);
   state.selected.signal = Math.max(0, Math.min(state.selected.signal, state.signals.length - 1));
-  state.selected.cycle = 0;
+  state.selected.cycle = Math.max(0, selectedSignal().wave.length - 1);
   state.rawSource = null;
   renderAll();
+}
+
+function getNodeAt(signal, index) {
+  return String(signal.node || "").charAt(index) === "." ? "" : String(signal.node || "").charAt(index);
+}
+
+function setNodeAt(signal, index, value) {
+  const length = Math.max(signal.wave.length, index + 1);
+  const chars = String(signal.node || "").padEnd(length, ".").split("");
+  chars[index] = value || ".";
+  signal.node = chars.join("").replace(/\.+$/, "");
+}
+
+function addEdgeFromForm() {
+  const from = els.edgeFrom.value.trim();
+  const to = els.edgeTo.value.trim();
+  if (!from || !to) {
+    alert("请填写连线的起点和终点节点字母。");
+    return;
+  }
+  commit();
+  const label = els.edgeLabel.value.trim();
+  state.edge.push(`${from}${els.edgeShape.value}${to}${label ? ` ${label}` : ""}`);
+  els.edgeFrom.value = "";
+  els.edgeTo.value = "";
+  els.edgeLabel.value = "";
+  state.rawSource = null;
+  renderAll();
+}
+
+function removeEdgeAt(index) {
+  commit();
+  state.edge.splice(index, 1);
+  state.rawSource = null;
+  renderAll();
+}
+
+function renderEdgeList() {
+  els.edgeList.innerHTML = "";
+  if (!state.edge?.length) {
+    const empty = document.createElement("div");
+    empty.className = "edge-empty";
+    empty.textContent = "暂无连线";
+    els.edgeList.appendChild(empty);
+    return;
+  }
+
+  state.edge.forEach((edge, index) => {
+    const item = document.createElement("div");
+    item.className = "edge-item";
+    const text = document.createElement("span");
+    text.textContent = edge;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "删除";
+    button.title = "删除这条连线";
+    button.addEventListener("click", () => removeEdgeAt(index));
+    item.append(text, button);
+    els.edgeList.appendChild(item);
+  });
+}
+
+function renderWaveHelp(wave) {
+  const info = waveInfo(wave);
+  els.waveHelp.innerHTML = `
+    <svg viewBox="0 0 96 34" aria-hidden="true">
+      <path d="${info.path}" />
+      ${info.bus ? '<polygon points="18 17 28 6 68 6 78 17 68 28 28 28" />' : ""}
+    </svg>
+    <div>
+      <strong>${info.title}</strong>
+      <span>${info.desc}</span>
+    </div>
+  `;
+}
+
+function waveInfo(wave) {
+  const base = {
+    "0": ["低电平 0", "稳定低电平", "M10 25H86"],
+    "1": ["高电平 1", "稳定高电平", "M10 9H86"],
+    l: ["低电平 l", "低电平，常用于和时钟混合", "M10 25H86"],
+    h: ["高电平 h", "高电平，常用于和时钟混合", "M10 9H86"],
+    L: ["低电平 L", "带箭头样式的低电平", "M10 25H86"],
+    H: ["高电平 H", "带箭头样式的高电平", "M10 9H86"],
+    p: ["上升沿时钟 p", "低到高再回低的时钟周期", "M10 25H30V9H58V25H86"],
+    n: ["下降沿时钟 n", "高到低再回高的时钟周期", "M10 9H30V25H58V9H86"],
+    P: ["上升沿箭头 P", "上升沿带工作边沿标记", "M10 25H30V9H58V25H86"],
+    N: ["下降沿箭头 N", "下降沿带工作边沿标记", "M10 9H30V25H58V9H86"],
+    "=": ["数据段 =", "显示 data 标签的总线段", "M18 17H78"],
+    x: ["未知 x", "未知或无效状态", "M10 25L86 9M10 9L86 25"],
+    z: ["高阻 z", "高阻态", "M10 17H86"],
+    u: ["上拉 u", "弱上拉状态", "M10 25L48 9L86 25"],
+    d: ["下拉 d", "弱下拉状态", "M10 9L48 25L86 9"],
+    ".": ["保持 .", "延续前一个状态", "M10 17H86"],
+    "|": ["断点 |", "在波形中插入视觉间隔", "M48 6V28"],
+  };
+  if (/^[2-9]$/.test(wave)) return { title: `数据样式 ${wave}`, desc: "彩色/分组总线数据段", path: "M18 17H78", bus: true };
+  const item = base[wave] || base.x;
+  return { title: item[0], desc: item[1], path: item[2], bus: wave === "=" };
 }
 
 function loadSelectedExample() {
@@ -646,7 +747,7 @@ function applySource(source, fallbackTitle = "WaveDrom Tutorial Example") {
   if (!state.signals.length) {
     state.signals = [{ name: "signal_1", color: "#2563eb", wave: ["0"], data: [""], period: 1, phase: 0, node: "" }];
   }
-  state.selected = { signal: 0, cycle: 0 };
+  state.selected = { signal: 0, cycle: Math.max(0, state.signals[0].wave.length - 1) };
 }
 
 function hasComplexSignal(signal) {
@@ -750,8 +851,6 @@ function renderPreview() {
 }
 
 function renderWithWaveDrom(source) {
-  els.renderStatus.textContent = "WaveDrom 官方渲染";
-  els.renderStatus.classList.remove("is-fallback");
   els.wavePreview.innerHTML = '<div id="WaveDrom_Display_0"></div>';
 
   try {
@@ -767,8 +866,6 @@ function renderWithWaveDrom(source) {
 }
 
 function renderWaveDromLikeSvg() {
-  els.renderStatus.textContent = "本地近似预览";
-  els.renderStatus.classList.add("is-fallback");
   const width = Math.max(720, 150 + maxCycles() * 64);
   const rowHeight = 46;
   const height = 48 + state.signals.length * rowHeight;

@@ -130,6 +130,7 @@
                 <option value="|">断点 |</option>
               </optgroup>
             </select>
+            <div class="wave-help" id="waveHelp" aria-live="polite"></div>
           </label>
           <label class="field" title="只对数据总线段生效。通常 wave 字符为 = 或 2-9 时，标签会显示在该周期中间。">
             <span>标签文字</span>
@@ -143,17 +144,35 @@
             <span>信号 phase</span>
             <input type="number" id="signalPhase" step="0.25" value="0" />
           </label>
-          <label class="field" title="WaveDrom 的节点标记字符串，用字母在波形周期位置上标点，供 edge 连线引用。例如 ..a..b。">
-            <span>节点 node</span>
-            <input id="signalNode" placeholder="例如 a...b" />
+          <label class="field" title="给当前选中的信号周期放一个节点字母，后面可以用这个字母做连线。比如在某个周期填 a，在另一个周期填 b，就可以连 a -> b。">
+            <span>当前周期节点</span>
+            <input id="cycleNode" maxlength="1" placeholder="例如 a" />
           </label>
-          <label class="field" title="WaveDrom 的节点连线列表，每行一条。例如 a->b request、a~b t1、g<->h 3 ms。节点字母来自各信号的 node 字段。">
-            <span>连线 edge</span>
-            <textarea id="edgeText" rows="4" placeholder="例如 a->b request"></textarea>
-          </label>
-          <label class="field" title="全局水平缩放比例。默认 1；值越大，每个周期越宽。对应 config: { hscale: N }。">
-            <span>config.hscale</span>
+          <div class="edge-builder" title="用已经放好的节点字母创建连线。起点和终点填写 node 字母，线型选择箭头或曲线，文字会显示在线上。">
+            <span class="field-title">节点连线</span>
+            <div class="edge-grid">
+              <input id="edgeFrom" maxlength="1" placeholder="起点 a" />
+              <select id="edgeShape">
+                <option value="->">箭头 -></option>
+                <option value="~>">曲线箭头 ~></option>
+                <option value="-~>">先直后曲 -~></option>
+                <option value="~->">先曲后直 ~-></option>
+                <option value="-|>">折线箭头 -|></option>
+                <option value="|->">折线箭头 |-></option>
+                <option value="<->">双向箭头 <-></option>
+                <option value="-">直线 -</option>
+                <option value="~">曲线 ~</option>
+              </select>
+              <input id="edgeTo" maxlength="1" placeholder="终点 b" />
+              <input id="edgeLabel" placeholder="文字" />
+            </div>
+            <button class="secondary edge-add" id="addEdge">添加连线</button>
+            <div class="edge-list" id="edgeList"></div>
+          </div>
+          <label class="field" title="横向缩放比例。默认 1；值越大，每个周期越宽，波形会横向拉长。对应 WaveDrom config: { hscale: N }。">
+            <span>横向缩放 hscale</span>
             <input type="number" id="hscaleInput" min="1" max="100" step="1" value="1" />
+            <small>控制每个周期的横向宽度，1 是默认，2 表示周期变宽一倍。</small>
           </label>
           <label class="field" title="WaveDrom 官方皮肤。default 是默认样式，dark 是深色，narrow/lowkey 是更紧凑或更低调的样式。">
             <span>config.skin</span>
@@ -180,7 +199,6 @@
             <div class="panel-title">
               <span>实时预览</span>
               <div class="panel-actions">
-                <span class="render-status" id="renderStatus">检测渲染器...</span>
                 <button class="panel-button" id="exportSvg" title="导出当前预览为 SVG 文件">导出 SVG</button>
                 <button class="panel-button" id="exportPng" title="导出当前预览为 PNG 图片">导出 PNG</button>
               </div>
