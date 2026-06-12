@@ -187,6 +187,27 @@
             <span>foot.text</span>
             <input id="footText" placeholder="页脚文字" />
           </label>
+          <div class="rich-text-builder" title="给图形标题 head.text 或页脚 foot.text 添加 WaveDrom 富文本片段。error、warning、info、success、muted 是官方教程 Step 7 里的彩色文字样式。">
+            <span class="field-title">标题/页脚富文本</span>
+            <div class="rich-grid">
+              <select id="richTarget">
+                <option value="head">标题 head</option>
+                <option value="foot">页脚 foot</option>
+              </select>
+              <select id="richStyle">
+                <option value="">默认</option>
+                <option value="error h1">error</option>
+                <option value="warning h2">warning</option>
+                <option value="info h3">info</option>
+                <option value="success h4">success</option>
+                <option value="muted h5">muted</option>
+                <option value="h6">h6</option>
+              </select>
+              <input id="richText" placeholder="文字，例如 warning" />
+            </div>
+            <button class="secondary edge-add" id="addRichText">添加富文本</button>
+            <div class="edge-list" id="richTextList"></div>
+          </div>
           <input type="file" id="importJsonInput" accept=".js,.json,.json5,text/javascript,application/json" hidden />
         </aside>
 

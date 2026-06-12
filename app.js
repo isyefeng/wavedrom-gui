@@ -4,6 +4,7 @@ const state = {
   config: { hscale: 1, skin: "default" },
   edge: [],
   foot: { text: "" },
+  richText: { head: [], foot: [] },
   rawSource: null,
   signals: [
     { name: "clk", color: "#e05d3c", wave: ["p", "p", "p", "p", "p", "p"], data: ["", "", "", "", "", ""], period: 1, phase: 0, node: "" },
@@ -247,6 +248,10 @@ function cacheElements() {
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
+  els.richTarget = document.querySelector("#richTarget");
+  els.richStyle = document.querySelector("#richStyle");
+  els.richText = document.querySelector("#richText");
+  els.richTextList = document.querySelector("#richTextList");
   els.importJsonInput = document.querySelector("#importJsonInput");
   els.donateDialog = document.querySelector("#donateDialog");
 
@@ -276,6 +281,7 @@ function bindEvents() {
   });
 
   document.querySelector("#loadExample").addEventListener("click", loadSelectedExample);
+  document.querySelector("#addRichText").addEventListener("click", addRichText);
   document.querySelector("#undoBtn").addEventListener("click", undo);
   document.querySelector("#redoBtn").addEventListener("click", redo);
   document.querySelector("#importJson").addEventListener("click", () => els.importJsonInput.click());
@@ -364,6 +370,7 @@ function restore(snapshot) {
   state.config = parsed.config || { hscale: 1, skin: "default" };
   state.edge = parsed.edge || [];
   state.foot = parsed.foot || { text: "" };
+  state.richText = parsed.richText || { head: [], foot: [] };
   state.rawSource = parsed.rawSource || null;
   renderAll();
 }
@@ -483,6 +490,7 @@ function syncInspector() {
   els.footText.value = state.foot?.text || "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
+  renderRichTextList();
 }
 
 function selectedSignal() {
@@ -592,6 +600,56 @@ function removeEdgeAt(index) {
   renderAll();
 }
 
+function addRichText() {
+  const text = els.richText.value.trim();
+  if (!text) {
+    alert("请先填写要添加的文字。");
+    return;
+  }
+  commit();
+  const target = els.richTarget.value === "foot" ? "foot" : "head";
+  state.richText[target].push({ text, className: els.richStyle.value });
+  els.richText.value = "";
+  state.rawSource = null;
+  renderAll();
+}
+
+function removeRichTextAt(target, index) {
+  commit();
+  state.richText[target].splice(index, 1);
+  state.rawSource = null;
+  renderAll();
+}
+
+function renderRichTextList() {
+  els.richTextList.innerHTML = "";
+  const items = [
+    ...state.richText.head.map((item, index) => ({ ...item, target: "head", index })),
+    ...state.richText.foot.map((item, index) => ({ ...item, target: "foot", index })),
+  ];
+
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "edge-empty";
+    empty.textContent = "暂无富文本";
+    els.richTextList.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "edge-item";
+    const label = document.createElement("span");
+    label.textContent = `${item.target}.${item.className || "default"}: ${item.text}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "删除";
+    button.addEventListener("click", () => removeRichTextAt(item.target, item.index));
+    row.append(label, button);
+    els.richTextList.appendChild(row);
+  });
+}
+
 function renderEdgeList() {
   els.edgeList.innerHTML = "";
   if (!state.edge?.length) {
@@ -622,7 +680,7 @@ function renderWaveHelp(wave) {
   els.waveHelp.innerHTML = `
     <svg viewBox="0 0 96 34" aria-hidden="true">
       <path d="${info.path}" />
-      ${info.bus ? '<polygon points="18 17 28 6 68 6 78 17 68 28 28 28" />' : ""}
+      ${info.bus ? `<polygon style="fill:${info.color}" points="18 17 28 6 68 6 78 17 68 28 28 28" />` : ""}
     </svg>
     <div>
       <strong>${info.title}</strong>
@@ -651,9 +709,12 @@ function waveInfo(wave) {
     ".": ["保持 .", "延续前一个状态", "M10 17H86"],
     "|": ["断点 |", "在波形中插入视觉间隔", "M48 6V28"],
   };
-  if (/^[2-9]$/.test(wave)) return { title: `数据样式 ${wave}`, desc: "彩色/分组总线数据段", path: "M18 17H78", bus: true };
+  const busColors = { 2: "#ff0000", 3: "#aaff00", 4: "#00ffd5", 5: "#ffbf00", 6: "#00ff19", 7: "#006aff" };
+  if (/^[2-9]$/.test(wave)) {
+    return { title: `数据样式 ${wave}`, desc: "彩色/分组总线数据段", path: "M18 17H78", bus: true, color: busColors[wave] || "#ffffff" };
+  }
   const item = base[wave] || base.x;
-  return { title: item[0], desc: item[1], path: item[2], bus: wave === "=" };
+  return { title: item[0], desc: item[1], path: item[2], bus: wave === "=", color: "#ffffff" };
 }
 
 function loadSelectedExample() {
@@ -716,14 +777,14 @@ function toWaveDromSource() {
   const source = {
     signal,
     head: {
-      text: state.title,
       tick: 0,
       every: 1,
     },
   };
+  source.head.text = richTextValue("head", state.title);
 
   if (state.edge?.length) source.edge = state.edge;
-  if (state.foot?.text) source.foot = { text: state.foot.text };
+  if (state.foot?.text || state.richText.foot.length) source.foot = { text: richTextValue("foot", state.foot.text) };
   if (state.config?.hscale !== 1 || state.config?.skin !== "default") {
     source.config = {};
     if (state.config.hscale !== 1) source.config.hscale = state.config.hscale;
@@ -736,13 +797,14 @@ function toWaveDromSource() {
 function applySource(source, fallbackTitle = "WaveDrom Tutorial Example") {
   const copy = structuredClone(source);
   state.rawSource = hasComplexSource(copy) ? copy : null;
-  state.title = copy.head?.text || fallbackTitle;
+  state.title = typeof copy.head?.text === "string" ? copy.head.text : fallbackTitle;
   state.config = {
     hscale: copy.config?.hscale || 1,
     skin: copy.config?.skin || "default",
   };
   state.edge = Array.isArray(copy.edge) ? copy.edge.slice() : [];
-  state.foot = { text: copy.foot?.text || "" };
+  state.foot = { text: typeof copy.foot?.text === "string" ? copy.foot.text : "" };
+  state.richText = { head: [], foot: [] };
   state.signals = flattenEditableSignals(copy.signal);
   if (!state.signals.length) {
     state.signals = [{ name: "signal_1", color: "#2563eb", wave: ["0"], data: [""], period: 1, phase: 0, node: "" }];
@@ -836,6 +898,19 @@ function dataValuesForSignal(signal) {
     if (isDataSegment) values.push(signal.data[index] || " ");
     return values;
   }, []);
+}
+
+function richTextValue(target, fallback) {
+  const items = state.richText[target] || [];
+  if (!items.length) return fallback || "";
+  return [
+    "tspan",
+    ...(fallback ? [fallback.endsWith(" ") ? fallback : `${fallback} `] : []),
+    ...items.map((item) => {
+      if (!item.className) return ["tspan", item.text.endsWith(" ") ? item.text : `${item.text} `];
+      return ["tspan", { class: item.className }, item.text.endsWith(" ") ? item.text : `${item.text} `];
+    }),
+  ];
 }
 
 function renderPreview() {

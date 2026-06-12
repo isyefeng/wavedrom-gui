@@ -16,6 +16,8 @@
 - 侧边栏高级选项带鼠标悬停说明
 - Wave 类型选择带小波形示例，便于理解当前周期形状
 - 节点编辑改为当前选中周期的节点字母，连线可通过起点/线型/终点/文字 UI 添加和删除
+- 左侧参数栏和右侧预览区独立滚动，调整参数时预览不会跟着跑
+- 支持添加 Step 7 里的 error/warning/info/success/muted 富文本到标题或页脚
 - 教程示例：内置 `tutorial.html` 的 14 个 WaveDrom 示例入口，覆盖 signal、clock、bus、gap、group、period/phase、hscale、skin、head/foot、node/edge、代码生成
 - 撤销/重做
 - 导出 WaveJSON（官网教程同款 JavaScript 对象语法）
