@@ -677,9 +677,12 @@ function renderEdgeList() {
 
 function renderWaveHelp(wave) {
   const info = waveInfo(wave);
+  const paths = (info.paths || [{ d: info.path }])
+    .map((path) => `<path${path.dash ? ' class="dash"' : ""} d="${path.d}" />`)
+    .join("");
   els.waveHelp.innerHTML = `
     <svg viewBox="0 0 96 34" aria-hidden="true">
-      <path d="${info.path}" />
+      ${paths}
       ${info.bus ? `<polygon style="fill:${info.color}" points="18 17 28 6 68 6 78 17 68 28 28 28" />` : ""}
     </svg>
     <div>
@@ -722,7 +725,36 @@ function waveInfo(wave) {
   if (/^[2-9]$/.test(wave)) {
     return { title: `数据样式 ${wave}`, desc: "彩色/分组总线数据段", path: "M18 17H78", bus: true, color: busColors[wave] || "#ffffff" };
   }
+  const helperPaths = {
+    "0": [{ d: "M10 9H24C34 9 36 25 50 25H86" }],
+    "1": [{ d: "M10 25H24C34 25 36 9 50 9H86" }],
+    l: [{ d: "M10 9H24C34 9 36 25 50 25H86" }],
+    h: [{ d: "M10 25H24C34 25 36 9 50 9H86" }],
+    L: [{ d: "M10 9H24C34 9 36 25 50 25H86" }],
+    H: [{ d: "M10 25H24C34 25 36 9 50 9H86" }],
+    x: [
+      { d: "M10 25H86" },
+      { d: "M10 9H86" },
+      { d: "M10 14L24 9M10 20L36 9M18 25L52 9M38 25L72 9M58 25L86 11M76 25L86 20" },
+    ],
+    z: [{ d: "M10 9H24C38 17 52 17 86 17" }],
+    u: [
+      { d: "M10 25H24C38 25 36 9 54 9" },
+      { d: "M54 9H86", dash: true },
+    ],
+    d: [
+      { d: "M10 9H24C38 9 36 25 54 25" },
+      { d: "M54 25H86", dash: true },
+    ],
+    "|": [
+      { d: "M39 29C50 29 48 5 59 5" },
+      { d: "M35 29C46 29 44 5 55 5" },
+    ],
+  };
   const item = base[wave] || base.x;
+  if (helperPaths[wave]) {
+    return { title: item[0], desc: item[1], path: "", paths: helperPaths[wave], bus: false, color: "#ffffff" };
+  }
   return { title: item[0], desc: item[1], path: item[2], bus: wave === "=", color: "#ffffff" };
 }
 

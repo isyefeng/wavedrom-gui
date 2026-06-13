@@ -523,6 +523,10 @@ h1 {
   stroke-linecap: square;
 }
 
+.wave-help path.dash {
+  stroke-dasharray: 4 5;
+}
+
 .wave-help polygon {
   fill: var(--surface);
   stroke: var(--text);
