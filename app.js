@@ -7,9 +7,9 @@ const state = {
   richText: { head: [], foot: [] },
   rawSource: null,
   signals: [
-    { name: "clk", color: "#e05d3c", wave: ["p", "p", "p", "p", "p", "p"], data: ["", "", "", "", "", ""], period: 1, phase: 0, node: "" },
-    { name: "data", color: "#176b87", wave: ["x", "=", ".", "=", "=", "x"], data: ["", "0x3A", "", "CMD", "ACK", ""], period: 1, phase: 0, node: "" },
-    { name: "valid", color: "#188f67", wave: ["0", "0", "1", ".", "0", "."], data: ["", "", "", "", "", ""], period: 1, phase: 0, node: "" },
+    { name: "clk", color: "#e05d3c", wave: ["p", "p", "p", "p", "p", "p"], data: ["", "", "", "", "", ""], period: 1, phase: 0, node: "", groupPath: [] },
+    { name: "data", color: "#176b87", wave: ["x", "=", ".", "=", "=", "x"], data: ["", "0x3A", "", "CMD", "ACK", ""], period: 1, phase: 0, node: "", groupPath: [] },
+    { name: "valid", color: "#188f67", wave: ["0", "0", "1", ".", "0", "."], data: ["", "", "", "", "", ""], period: 1, phase: 0, node: "", groupPath: [] },
   ],
 };
 
@@ -245,6 +245,9 @@ function cacheElements() {
   els.edgeTo = document.querySelector("#edgeTo");
   els.edgeLabel = document.querySelector("#edgeLabel");
   els.edgeList = document.querySelector("#edgeList");
+  ensureGroupEditor();
+  els.groupPath = document.querySelector("#groupPath");
+  els.groupList = document.querySelector("#groupList");
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
@@ -261,6 +264,22 @@ function cacheElements() {
     option.textContent = example.title;
     els.exampleSelect.appendChild(option);
   });
+}
+
+function ensureGroupEditor() {
+  if (document.querySelector("#groupPath")) return;
+  const panel = document.createElement("div");
+  panel.className = "group-builder";
+  panel.title =
+    "WaveDrom Step 5 Groups. Set the selected signal group path, for example Master or Master/ctrl. Export will generate nested official signal arrays.";
+  panel.innerHTML = `
+    <span class="field-title">Groups / 信号分组</span>
+    <input id="groupPath" placeholder="例如 Master 或 Master/ctrl" />
+    <small>用 / 表示嵌套分组；留空表示不分组。</small>
+    <div class="edge-list" id="groupList"></div>
+  `;
+  const edgePanel = document.querySelector("#edgeList")?.parentElement;
+  edgePanel?.insertAdjacentElement("afterend", panel);
 }
 
 function bindEvents() {
@@ -328,6 +347,13 @@ function bindEvents() {
 
   document.querySelector("#addEdge").addEventListener("click", addEdgeFromForm);
 
+  els.groupPath.addEventListener("input", (event) => {
+    commit();
+    selectedSignal().groupPath = parseGroupPath(event.target.value);
+    state.rawSource = null;
+    renderAll();
+  });
+
   els.hscaleInput.addEventListener("input", (event) => {
     commit();
     state.config.hscale = Math.max(1, Number(event.target.value) || 1);
@@ -366,7 +392,7 @@ function restore(snapshot) {
   const parsed = JSON.parse(snapshot);
   state.title = parsed.title;
   state.selected = parsed.selected;
-  state.signals = parsed.signals;
+  state.signals = normalizeEditableSignals(parsed.signals);
   state.config = parsed.config || { hscale: 1, skin: "default" };
   state.edge = parsed.edge || [];
   state.foot = parsed.foot || { text: "" };
@@ -401,6 +427,9 @@ function renderSignalTable() {
     const row = document.createElement("div");
     row.className = "signal-row";
 
+    const nameCell = document.createElement("div");
+    nameCell.className = "signal-name-cell";
+
     const name = document.createElement("input");
     name.className = "signal-name";
     name.value = signal.name;
@@ -409,7 +438,15 @@ function renderSignalTable() {
       signal.name = event.target.value;
       renderPreview();
     });
-    row.appendChild(name);
+    nameCell.appendChild(name);
+
+    if (signal.groupPath?.length) {
+      const groupBadge = document.createElement("div");
+      groupBadge.className = "group-badge";
+      groupBadge.textContent = formatGroupPath(signal.groupPath);
+      nameCell.appendChild(groupBadge);
+    }
+    row.appendChild(nameCell);
 
     const cycles = document.createElement("div");
     cycles.className = "cycle-list";
@@ -485,11 +522,13 @@ function syncInspector() {
   els.signalPeriod.value = signal.period || 1;
   els.signalPhase.value = signal.phase || 0;
   els.cycleNode.value = getNodeAt(signal, state.selected.cycle);
+  els.groupPath.value = formatGroupPath(signal.groupPath);
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
+  renderGroupList();
   renderRichTextList();
 }
 
@@ -549,6 +588,7 @@ function addSignal() {
     period: 1,
     phase: 0,
     node: "",
+    groupPath: [],
   });
   state.rawSource = null;
   state.selected = { signal: state.signals.length - 1, cycle: 3 };
@@ -673,6 +713,48 @@ function renderEdgeList() {
     item.append(text, button);
     els.edgeList.appendChild(item);
   });
+}
+
+function renderGroupList() {
+  els.groupList.innerHTML = "";
+  const grouped = state.signals
+    .map((signal, index) => ({ index, name: signal.name, path: formatGroupPath(signal.groupPath) }))
+    .filter((item) => item.path);
+
+  if (!grouped.length) {
+    const empty = document.createElement("div");
+    empty.className = "edge-empty";
+    empty.textContent = "暂无信号分组";
+    els.groupList.appendChild(empty);
+    return;
+  }
+
+  grouped.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "edge-item";
+    const label = document.createElement("span");
+    label.textContent = `${item.name}: ${item.path}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "选中";
+    button.addEventListener("click", () => {
+      state.selected = { signal: item.index, cycle: Math.min(state.selected.cycle, state.signals[item.index].wave.length - 1) };
+      renderAll();
+    });
+    row.append(label, button);
+    els.groupList.appendChild(row);
+  });
+}
+
+function parseGroupPath(value) {
+  return String(value || "")
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function formatGroupPath(groupPath) {
+  return Array.isArray(groupPath) ? groupPath.filter(Boolean).join("/") : "";
 }
 
 function renderWaveHelp(wave) {
@@ -802,7 +884,7 @@ function parseWaveJson(text) {
 function toWaveDromSource() {
   if (state.rawSource) return structuredClone(state.rawSource);
 
-  const signal = state.signals.map((signal) => {
+  const lanes = state.signals.map((signal) => {
     const lane = {
       name: signal.name,
       wave: signal.wave.join(""),
@@ -812,8 +894,9 @@ function toWaveDromSource() {
     if (signal.period && signal.period !== 1) lane.period = signal.period;
     if (signal.phase) lane.phase = signal.phase;
     if (signal.node) lane.node = signal.node;
-    return lane;
+    return { lane, groupPath: signal.groupPath || [] };
   });
+  const signal = buildGroupedSignals(lanes);
 
   const source = {
     signal,
@@ -848,13 +931,18 @@ function applySource(source, fallbackTitle = "WaveDrom Tutorial Example") {
   state.richText = { head: [], foot: [] };
   state.signals = flattenEditableSignals(copy.signal);
   if (!state.signals.length) {
-    state.signals = [{ name: "signal_1", color: "#2563eb", wave: ["0"], data: [""], period: 1, phase: 0, node: "" }];
+    state.signals = [{ name: "signal_1", color: "#2563eb", wave: ["0"], data: [""], period: 1, phase: 0, node: "", groupPath: [] }];
   }
   state.selected = { signal: 0, cycle: Math.max(0, state.signals[0].wave.length - 1) };
 }
 
 function hasComplexSignal(signal) {
-  return Array.isArray(signal) && signal.some((item) => Array.isArray(item) || !item.name || !item.wave);
+  if (!Array.isArray(signal)) return false;
+  return signal.some((item) => {
+    if (Array.isArray(item)) return false;
+    if (!item || Object.keys(item).length === 0) return false;
+    return !item.name || !item.wave;
+  });
 }
 
 function hasComplexSource(source) {
@@ -869,13 +957,15 @@ function hasComplexSource(source) {
 
 function flattenEditableSignals(signal) {
   const lanes = [];
-  function walk(items) {
+  function walk(items, groupPath = []) {
     if (!Array.isArray(items)) return;
     items.forEach((item) => {
       if (Array.isArray(item)) {
-        walk(item.slice(1));
+        const [groupName, ...children] = item;
+        const nextPath = typeof groupName === "string" ? [...groupPath, groupName] : groupPath;
+        walk(children, nextPath);
       } else if (item && item.name && item.wave) {
-        lanes.push(toEditableSignal(item));
+        lanes.push(toEditableSignal(item, groupPath));
       }
     });
   }
@@ -883,7 +973,7 @@ function flattenEditableSignals(signal) {
   return lanes;
 }
 
-function toEditableSignal(lane) {
+function toEditableSignal(lane, groupPath = []) {
   const data = normalizeData(lane.data);
   return {
     name: lane.name,
@@ -893,6 +983,7 @@ function toEditableSignal(lane) {
     period: lane.period || 1,
     phase: lane.phase || 0,
     node: lane.node || "",
+    groupPath: groupPath.slice(),
   };
 }
 
@@ -912,6 +1003,34 @@ function labelsByCycle(wave, data) {
     }
     return "";
   });
+}
+
+function normalizeEditableSignals(signals) {
+  return (Array.isArray(signals) ? signals : []).map((signal) => ({
+    ...signal,
+    groupPath: Array.isArray(signal.groupPath) ? signal.groupPath : [],
+  }));
+}
+
+function buildGroupedSignals(items) {
+  const root = [];
+
+  items.forEach(({ lane, groupPath }) => {
+    let level = root;
+    parseGroupPath(formatGroupPath(groupPath)).forEach((groupName) => {
+      const last = level[level.length - 1];
+      if (Array.isArray(last) && last[0] === groupName) {
+        level = last;
+        return;
+      }
+      const group = [groupName];
+      level.push(group);
+      level = group;
+    });
+    level.push(lane);
+  });
+
+  return root;
 }
 
 /*

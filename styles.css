@@ -410,15 +410,32 @@ h1 {
   border-bottom: 0;
 }
 
+.signal-name-cell {
+  display: grid;
+  align-content: center;
+  min-height: 58px;
+  border-right: 1px solid var(--line);
+  padding: 6px 10px;
+  gap: 3px;
+}
+
 .signal-name {
   width: 100%;
-  height: 58px;
+  min-height: 26px;
   border: 0;
-  border-right: 1px solid var(--line);
-  padding: 0 14px;
+  padding: 0 4px;
   background: transparent;
   color: var(--text);
   font-weight: 700;
+}
+
+.group-badge {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cycle-list {
@@ -547,6 +564,7 @@ h1 {
 }
 
 .edge-builder,
+.group-builder,
 .rich-text-builder {
   display: grid;
   gap: 8px;
@@ -569,6 +587,7 @@ h1 {
 
 .edge-grid input,
 .edge-grid select,
+.group-builder input,
 .rich-grid input,
 .rich-grid select {
   min-width: 0;
@@ -578,6 +597,12 @@ h1 {
   padding: 0 8px;
   background: var(--bg);
   color: var(--text);
+}
+
+.group-builder small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 
 .edge-grid input:last-child {
