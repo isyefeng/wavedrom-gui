@@ -246,7 +246,9 @@ function cacheElements() {
   els.edgeLabel = document.querySelector("#edgeLabel");
   els.edgeList = document.querySelector("#edgeList");
   ensureGroupEditor();
-  els.groupPath = document.querySelector("#groupPath");
+  els.groupLevel1 = document.querySelector("#groupLevel1");
+  els.groupLevel2 = document.querySelector("#groupLevel2");
+  els.clearGroup = document.querySelector("#clearGroup");
   els.groupList = document.querySelector("#groupList");
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
@@ -267,15 +269,21 @@ function cacheElements() {
 }
 
 function ensureGroupEditor() {
-  if (document.querySelector("#groupPath")) return;
+  if (document.querySelector("#groupLevel1")) return;
   const panel = document.createElement("div");
   panel.className = "group-builder";
   panel.title =
-    "WaveDrom Step 5 Groups. Set the selected signal group path, for example Master or Master/ctrl. Export will generate nested official signal arrays.";
+    "WaveDrom Step 5 Groups. Set first-level and second-level groups for the selected signal. Export will generate nested official signal arrays.";
   panel.innerHTML = `
     <span class="field-title">Groups / 信号分组</span>
-    <input id="groupPath" placeholder="例如 Master 或 Master/ctrl" />
-    <small>用 / 表示嵌套分组；留空表示不分组。</small>
+    <div class="group-grid">
+      <input id="groupLevel1" list="groupLevel1Options" placeholder="一级分组，例如 Master" />
+      <input id="groupLevel2" list="groupLevel2Options" placeholder="二级分组，例如 ctrl" />
+      <button class="secondary" id="clearGroup" type="button">清空</button>
+    </div>
+    <datalist id="groupLevel1Options"></datalist>
+    <datalist id="groupLevel2Options"></datalist>
+    <small>二级分组会自动嵌套在一级分组下面；留空表示不分组。</small>
     <div class="edge-list" id="groupList"></div>
   `;
   const edgePanel = document.querySelector("#edgeList")?.parentElement;
@@ -347,9 +355,11 @@ function bindEvents() {
 
   document.querySelector("#addEdge").addEventListener("click", addEdgeFromForm);
 
-  els.groupPath.addEventListener("input", (event) => {
+  els.groupLevel1.addEventListener("input", updateSelectedGroupFromForm);
+  els.groupLevel2.addEventListener("input", updateSelectedGroupFromForm);
+  els.clearGroup.addEventListener("click", () => {
     commit();
-    selectedSignal().groupPath = parseGroupPath(event.target.value);
+    selectedSignal().groupPath = [];
     state.rawSource = null;
     renderAll();
   });
@@ -522,13 +532,15 @@ function syncInspector() {
   els.signalPeriod.value = signal.period || 1;
   els.signalPhase.value = signal.phase || 0;
   els.cycleNode.value = getNodeAt(signal, state.selected.cycle);
-  els.groupPath.value = formatGroupPath(signal.groupPath);
+  els.groupLevel1.value = signal.groupPath?.[0] || "";
+  els.groupLevel2.value = signal.groupPath?.[1] || "";
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
   renderGroupList();
+  renderGroupOptions();
   renderRichTextList();
 }
 
@@ -744,6 +756,29 @@ function renderGroupList() {
     row.append(label, button);
     els.groupList.appendChild(row);
   });
+}
+
+function renderGroupOptions() {
+  const level1 = document.querySelector("#groupLevel1Options");
+  const level2 = document.querySelector("#groupLevel2Options");
+  if (!level1 || !level2) return;
+  const level1Values = new Set();
+  const level2Values = new Set();
+  state.signals.forEach((signal) => {
+    if (signal.groupPath?.[0]) level1Values.add(signal.groupPath[0]);
+    if (signal.groupPath?.[1]) level2Values.add(signal.groupPath[1]);
+  });
+  level1.innerHTML = [...level1Values].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+  level2.innerHTML = [...level2Values].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+}
+
+function updateSelectedGroupFromForm() {
+  commit();
+  const first = els.groupLevel1.value.trim();
+  const second = els.groupLevel2.value.trim();
+  selectedSignal().groupPath = first ? [first, ...(second ? [second] : [])] : [];
+  state.rawSource = null;
+  renderAll();
 }
 
 function parseGroupPath(value) {

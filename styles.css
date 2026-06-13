@@ -585,9 +585,16 @@ h1 {
   gap: 8px;
 }
 
+.group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+}
+
 .edge-grid input,
 .edge-grid select,
 .group-builder input,
+.group-grid button,
 .rich-grid input,
 .rich-grid select {
   min-width: 0;
@@ -597,6 +604,11 @@ h1 {
   padding: 0 8px;
   background: var(--bg);
   color: var(--text);
+}
+
+.group-grid button {
+  padding: 0 12px;
+  font-size: 0.88rem;
 }
 
 .group-builder small {
@@ -744,17 +756,13 @@ h1 {
 }
 
 .qr {
-  display: grid;
-  width: 132px;
-  height: 132px;
-  place-items: center;
-  border: 1px dashed var(--muted);
-  background:
-    linear-gradient(90deg, transparent 47%, color-mix(in srgb, var(--text) 18%, transparent) 48% 52%, transparent 53%),
-    linear-gradient(transparent 47%, color-mix(in srgb, var(--text) 18%, transparent) 48% 52%, transparent 53%),
-    var(--surface-2);
-  color: var(--text);
-  font-weight: 800;
+  display: block;
+  width: 156px;
+  height: 156px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
 }
 
 .payment-links {
