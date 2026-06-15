@@ -585,16 +585,27 @@ h1 {
   gap: 8px;
 }
 
-.group-grid {
+.group-levels {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+}
+
+.group-level-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.group-actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .edge-grid input,
 .edge-grid select,
 .group-builder input,
-.group-grid button,
+.group-level-row button,
 .rich-grid input,
 .rich-grid select {
   min-width: 0;
@@ -606,7 +617,8 @@ h1 {
   color: var(--text);
 }
 
-.group-grid button {
+.group-level-row button,
+.group-actions button {
   padding: 0 12px;
   font-size: 0.88rem;
 }

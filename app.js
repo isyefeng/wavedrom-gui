@@ -1,5 +1,6 @@
 const state = {
   title: "Untitled Timing Diagram",
+  language: "zh",
   selected: { signal: 0, cycle: 5 },
   config: { hscale: 1, skin: "default" },
   edge: [],
@@ -216,6 +217,109 @@ const future = [];
 
 const els = {};
 
+const i18n = {
+  zh: {
+    "nav.docs": "说明文档",
+    "nav.start": "快速开始",
+    "nav.support": "作者/支持",
+    "nav.donate": "支持作者",
+    "hero.eyebrow": "Online timing diagram editor",
+    "hero.title": "WaveDrom 在线可视化编辑器",
+    "hero.text": "用图形化方式创建、修改和导出时序波形。主页保持简洁入口，编辑器负责完整的行、周期和标签编辑。",
+    "docs.title": "说明文档",
+    "docs.text": "支持新增信号行、编辑周期、修改标签、导出 WaveDrom JSON 与 SVG。后续可接入账号和云端保存。",
+    "license.title": "许可声明",
+    "license.text": "本项目使用 WaveDrom JS，遵循 MIT License。用户生成的波形内容版权归用户所有。",
+    "support.title": "作者/支持",
+    "support.text": "通过顶部“支持作者”入口打开支持信息，可配置支付宝、微信、PayPal 或 Stripe 链接。",
+    "field.docTitle": "文档标题",
+    "field.examples": "教程示例",
+    "field.selectedCycle": "选中周期",
+    "field.label": "标签文字",
+    "field.period": "周期",
+    "field.phase": "相位",
+    "field.node": "当前周期节点",
+    "field.edges": "节点连线",
+    "field.groups": "Groups / 信号分组",
+    "field.hscale": "横向缩放 hscale",
+    "field.skin": "config.skin",
+    "field.foot": "foot.text",
+    "field.rich": "标题/页脚富文本",
+    "button.undo": "撤销",
+    "button.redo": "重做",
+    "button.loadExample": "载入示例",
+    "button.addEdge": "添加连线",
+    "button.addRich": "添加富文本",
+    "button.home": "主页",
+    "button.import": "导入",
+    "button.export": "导出",
+    "button.exportSvg": "导出 SVG",
+    "button.exportPng": "导出 PNG",
+    "button.addGroup": "+ 添加层级",
+    "button.clear": "清空",
+    "button.remove": "删除",
+    "button.select": "选中",
+    "option.current": "当前图形",
+    "panel.preview": "实时预览",
+    "panel.wavejson": "WaveJSON（官网教程语法）",
+    "placeholder.label": "例如 ACK / 0x3A",
+    "placeholder.node": "例如 a",
+    "placeholder.group": "第 {n} 级分组",
+    "group.help": "可以自由添加多级嵌套分组；导出时会生成 WaveDrom 官方嵌套 signal 数组。",
+    "group.empty": "暂无信号分组",
+  },
+  en: {
+    "nav.docs": "Docs",
+    "nav.start": "Start",
+    "nav.support": "Author / Support",
+    "nav.donate": "Support",
+    "hero.eyebrow": "Online timing diagram editor",
+    "hero.title": "WaveDrom Visual Editor",
+    "hero.text": "Create, edit, preview, and export WaveDrom timing diagrams through a visual UI.",
+    "docs.title": "Docs",
+    "docs.text": "Add signals, edit cycles, change labels, and export WaveDrom JSON, SVG, or PNG.",
+    "license.title": "License",
+    "license.text": "This project uses WaveDrom JS under the MIT License. Diagrams created by users belong to users.",
+    "support.title": "Author / Support",
+    "support.text": "Use the Support button in the top bar to open donation and payment information.",
+    "field.docTitle": "Document Title",
+    "field.examples": "Tutorial Examples",
+    "field.selectedCycle": "Selected Cycle",
+    "field.label": "Label Text",
+    "field.period": "Period",
+    "field.phase": "Phase",
+    "field.node": "Cycle Node",
+    "field.edges": "Node Edges",
+    "field.groups": "Groups",
+    "field.hscale": "Horizontal Scale hscale",
+    "field.skin": "config.skin",
+    "field.foot": "foot.text",
+    "field.rich": "Head / Foot Rich Text",
+    "button.undo": "Undo",
+    "button.redo": "Redo",
+    "button.loadExample": "Load Example",
+    "button.addEdge": "Add Edge",
+    "button.addRich": "Add Rich Text",
+    "button.home": "Home",
+    "button.import": "Import",
+    "button.export": "Export",
+    "button.exportSvg": "Export SVG",
+    "button.exportPng": "Export PNG",
+    "button.addGroup": "+ Add Level",
+    "button.clear": "Clear",
+    "button.remove": "Remove",
+    "button.select": "Select",
+    "option.current": "Current Diagram",
+    "panel.preview": "Live Preview",
+    "panel.wavejson": "WaveJSON (official tutorial syntax)",
+    "placeholder.label": "e.g. ACK / 0x3A",
+    "placeholder.node": "e.g. a",
+    "placeholder.group": "Group level {n}",
+    "group.help": "Add as many nested group levels as needed. Export keeps WaveDrom's official nested signal arrays.",
+    "group.empty": "No signal groups",
+  },
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   bindEvents();
@@ -246,10 +350,11 @@ function cacheElements() {
   els.edgeLabel = document.querySelector("#edgeLabel");
   els.edgeList = document.querySelector("#edgeList");
   ensureGroupEditor();
-  els.groupLevel1 = document.querySelector("#groupLevel1");
-  els.groupLevel2 = document.querySelector("#groupLevel2");
+  els.groupLevels = document.querySelector("#groupLevels");
+  els.addGroupLevel = document.querySelector("#addGroupLevel");
   els.clearGroup = document.querySelector("#clearGroup");
   els.groupList = document.querySelector("#groupList");
+  els.langToggle = document.querySelector("#langToggle");
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
@@ -269,21 +374,20 @@ function cacheElements() {
 }
 
 function ensureGroupEditor() {
-  if (document.querySelector("#groupLevel1")) return;
+  if (document.querySelector("#groupLevels")) return;
   const panel = document.createElement("div");
   panel.className = "group-builder";
   panel.title =
-    "WaveDrom Step 5 Groups. Set first-level and second-level groups for the selected signal. Export will generate nested official signal arrays.";
+    "WaveDrom Step 5 Groups. Add nested group levels for the selected signal. Export will generate official nested signal arrays.";
   panel.innerHTML = `
-    <span class="field-title">Groups / 信号分组</span>
-    <div class="group-grid">
-      <input id="groupLevel1" list="groupLevel1Options" placeholder="一级分组，例如 Master" />
-      <input id="groupLevel2" list="groupLevel2Options" placeholder="二级分组，例如 ctrl" />
-      <button class="secondary" id="clearGroup" type="button">清空</button>
+    <span class="field-title" data-i18n="field.groups">Groups / 信号分组</span>
+    <div class="group-levels" id="groupLevels"></div>
+    <div class="group-actions">
+      <button class="secondary" id="addGroupLevel" type="button" data-i18n="button.addGroup">+ 添加层级</button>
+      <button class="secondary" id="clearGroup" type="button" data-i18n="button.clear">清空</button>
     </div>
-    <datalist id="groupLevel1Options"></datalist>
-    <datalist id="groupLevel2Options"></datalist>
-    <small>二级分组会自动嵌套在一级分组下面；留空表示不分组。</small>
+    <datalist id="groupLevelOptions"></datalist>
+    <small data-i18n="group.help">可以自由添加多级嵌套分组；导出时会生成 WaveDrom 官方嵌套 signal 数组。</small>
     <div class="edge-list" id="groupList"></div>
   `;
   const edgePanel = document.querySelector("#edgeList")?.parentElement;
@@ -306,6 +410,7 @@ function bindEvents() {
   document.querySelector("#themeToggle").addEventListener("click", () => {
     document.body.classList.toggle("dark");
   });
+  els.langToggle.addEventListener("click", toggleLanguage);
 
   document.querySelector("#loadExample").addEventListener("click", loadSelectedExample);
   document.querySelector("#addRichText").addEventListener("click", addRichText);
@@ -355,8 +460,21 @@ function bindEvents() {
 
   document.querySelector("#addEdge").addEventListener("click", addEdgeFromForm);
 
-  els.groupLevel1.addEventListener("input", updateSelectedGroupFromForm);
-  els.groupLevel2.addEventListener("input", updateSelectedGroupFromForm);
+  els.groupLevels.addEventListener("input", updateSelectedGroupFromForm);
+  els.groupLevels.addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-remove-group-level]");
+    if (!removeButton) return;
+    commit();
+    selectedSignal().groupPath.splice(Number(removeButton.dataset.removeGroupLevel), 1);
+    state.rawSource = null;
+    renderAll();
+  });
+  els.addGroupLevel.addEventListener("click", () => {
+    commit();
+    selectedSignal().groupPath = [...(selectedSignal().groupPath || []), ""];
+    state.rawSource = null;
+    renderAll();
+  });
   els.clearGroup.addEventListener("click", () => {
     commit();
     selectedSignal().groupPath = [];
@@ -392,6 +510,33 @@ function setView(view) {
   els.editorView.classList.toggle("is-hidden", !isEditor);
 }
 
+function t(key, params = {}) {
+  let text = i18n[state.language]?.[key] || i18n.zh[key] || key;
+  Object.entries(params).forEach(([name, value]) => {
+    text = text.replace(`{${name}}`, value);
+  });
+  return text;
+}
+
+function toggleLanguage() {
+  state.language = state.language === "zh" ? "en" : "zh";
+  renderAll();
+}
+
+function applyLanguage() {
+  document.documentElement.lang = state.language === "zh" ? "zh-CN" : "en";
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+  if (els.langToggle) {
+    els.langToggle.textContent = state.language === "zh" ? "EN" : "中";
+    els.langToggle.title = state.language === "zh" ? "Switch to English" : "切换到中文";
+  }
+}
+
 function commit() {
   history.push(JSON.stringify(state));
   if (history.length > 80) history.shift();
@@ -401,6 +546,7 @@ function commit() {
 function restore(snapshot) {
   const parsed = JSON.parse(snapshot);
   state.title = parsed.title;
+  state.language = parsed.language || state.language || "zh";
   state.selected = parsed.selected;
   state.signals = normalizeEditableSignals(parsed.signals);
   state.config = parsed.config || { hscale: 1, skin: "default" };
@@ -532,16 +678,16 @@ function syncInspector() {
   els.signalPeriod.value = signal.period || 1;
   els.signalPhase.value = signal.phase || 0;
   els.cycleNode.value = getNodeAt(signal, state.selected.cycle);
-  els.groupLevel1.value = signal.groupPath?.[0] || "";
-  els.groupLevel2.value = signal.groupPath?.[1] || "";
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
+  renderGroupControls();
   renderGroupList();
   renderGroupOptions();
   renderRichTextList();
+  applyLanguage();
 }
 
 function selectedSignal() {
@@ -736,7 +882,7 @@ function renderGroupList() {
   if (!grouped.length) {
     const empty = document.createElement("div");
     empty.className = "edge-empty";
-    empty.textContent = "暂无信号分组";
+    empty.textContent = t("group.empty");
     els.groupList.appendChild(empty);
     return;
   }
@@ -748,7 +894,7 @@ function renderGroupList() {
     label.textContent = `${item.name}: ${item.path}`;
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "选中";
+    button.textContent = t("button.select");
     button.addEventListener("click", () => {
       state.selected = { signal: item.index, cycle: Math.min(state.selected.cycle, state.signals[item.index].wave.length - 1) };
       renderAll();
@@ -758,25 +904,50 @@ function renderGroupList() {
   });
 }
 
-function renderGroupOptions() {
-  const level1 = document.querySelector("#groupLevel1Options");
-  const level2 = document.querySelector("#groupLevel2Options");
-  if (!level1 || !level2) return;
-  const level1Values = new Set();
-  const level2Values = new Set();
-  state.signals.forEach((signal) => {
-    if (signal.groupPath?.[0]) level1Values.add(signal.groupPath[0]);
-    if (signal.groupPath?.[1]) level2Values.add(signal.groupPath[1]);
+function renderGroupControls() {
+  const signal = selectedSignal();
+  const levels = signal.groupPath?.length ? signal.groupPath : [""];
+  els.groupLevels.innerHTML = "";
+
+  levels.forEach((value, index) => {
+    const row = document.createElement("div");
+    row.className = "group-level-row";
+    const input = document.createElement("input");
+    input.value = value || "";
+    input.dataset.groupLevel = String(index);
+    input.setAttribute("list", "groupLevelOptions");
+    input.placeholder = t("placeholder.group", { n: index + 1 });
+    row.appendChild(input);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "secondary";
+    remove.dataset.removeGroupLevel = String(index);
+    remove.textContent = t("button.remove");
+    remove.disabled = levels.length === 1 && !value;
+    row.appendChild(remove);
+    els.groupLevels.appendChild(row);
   });
-  level1.innerHTML = [...level1Values].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
-  level2.innerHTML = [...level2Values].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+}
+
+function renderGroupOptions() {
+  const datalist = document.querySelector("#groupLevelOptions");
+  if (!datalist) return;
+  const values = new Set();
+  state.signals.forEach((signal) => {
+    (signal.groupPath || []).forEach((level) => {
+      if (level) values.add(level);
+    });
+  });
+  datalist.innerHTML = [...values].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
 }
 
 function updateSelectedGroupFromForm() {
   commit();
-  const first = els.groupLevel1.value.trim();
-  const second = els.groupLevel2.value.trim();
-  selectedSignal().groupPath = first ? [first, ...(second ? [second] : [])] : [];
+  const levels = [...els.groupLevels.querySelectorAll("[data-group-level]")]
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+  selectedSignal().groupPath = levels;
   state.rawSource = null;
   renderAll();
 }

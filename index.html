@@ -20,13 +20,14 @@
         <span>WaveDrom GUI</span>
       </button>
       <nav class="nav">
-        <a href="#docs">说明文档</a>
-        <button data-start>快速开始</button>
-        <a href="#support">作者/支持</a>
+        <a href="#docs" data-i18n="nav.docs">说明文档</a>
+        <button data-start data-i18n="nav.start">快速开始</button>
+        <a href="#support" data-i18n="nav.support">作者/支持</a>
       </nav>
       <div class="top-actions">
         <button class="icon-button" id="themeToggle" aria-label="切换主题" title="切换主题">◐</button>
-        <button class="donate-button" data-donate>支持作者</button>
+        <button class="icon-button" id="langToggle" aria-label="Switch language" title="Switch language">EN</button>
+        <button class="donate-button" data-donate data-i18n="nav.donate">支持作者</button>
       </div>
     </header>
 
@@ -34,13 +35,13 @@
       <section class="home-view" id="homeView">
         <div class="hero">
           <div class="hero-copy">
-            <p class="eyebrow">Online timing diagram editor</p>
-            <h1>WaveDrom 在线可视化编辑器</h1>
-            <p class="hero-text">
+            <p class="eyebrow" data-i18n="hero.eyebrow">Online timing diagram editor</p>
+            <h1 data-i18n="hero.title">WaveDrom 在线可视化编辑器</h1>
+            <p class="hero-text" data-i18n="hero.text">
               用图形化方式创建、修改和导出时序波形。主页保持简洁入口，编辑器负责完整的行、周期和标签编辑。
             </p>
             <div class="hero-actions">
-              <button class="primary" data-start>快速开始</button>
+              <button class="primary" data-start data-i18n="nav.start">快速开始</button>
             </div>
           </div>
           <div class="hero-preview" aria-label="波形示意图">
@@ -64,16 +65,16 @@
 
         <section class="info-band" id="docs">
           <div>
-            <h2>说明文档</h2>
-            <p>支持新增信号行、编辑周期、修改标签、导出 WaveDrom JSON 与 SVG。后续可接入账号和云端保存。</p>
+            <h2 data-i18n="docs.title">说明文档</h2>
+            <p data-i18n="docs.text">支持新增信号行、编辑周期、修改标签、导出 WaveDrom JSON 与 SVG。后续可接入账号和云端保存。</p>
           </div>
           <div>
-            <h2>许可声明</h2>
-            <p>本项目使用 WaveDrom JS，遵循 MIT License。用户生成的波形内容版权归用户所有。</p>
+            <h2 data-i18n="license.title">许可声明</h2>
+            <p data-i18n="license.text">本项目使用 WaveDrom JS，遵循 MIT License。用户生成的波形内容版权归用户所有。</p>
           </div>
           <div id="support">
-            <h2>作者/支持</h2>
-            <p>通过顶部“支持作者”入口打开支持信息，可配置支付宝、微信、PayPal 或 Stripe 链接。</p>
+            <h2 data-i18n="support.title">作者/支持</h2>
+            <p data-i18n="support.text">通过顶部“支持作者”入口打开支持信息，可配置支付宝、微信、PayPal 或 Stripe 链接。</p>
           </div>
         </section>
       </section>
@@ -81,24 +82,24 @@
       <section class="editor-view is-hidden" id="editorView">
         <aside class="sidebar">
           <label class="field">
-            <span>文档标题</span>
+            <span data-i18n="field.docTitle">文档标题</span>
             <input id="docTitle" value="Untitled Timing Diagram" />
           </label>
           <div class="button-row">
-            <button class="secondary" id="undoBtn">撤销</button>
-            <button class="secondary" id="redoBtn">重做</button>
+            <button class="secondary" id="undoBtn" data-i18n="button.undo">撤销</button>
+            <button class="secondary" id="redoBtn" data-i18n="button.redo">重做</button>
           </div>
           <label class="field" title="WaveDrom 教程中的官方示例。载入后可查看对应图形，并继续编辑普通信号行。">
-            <span>教程示例</span>
+            <span data-i18n="field.examples">教程示例</span>
             <select id="exampleSelect">
-              <option value="">当前图形</option>
+              <option value="" data-i18n="option.current">当前图形</option>
             </select>
           </label>
           <div class="button-row">
-            <button class="secondary" id="loadExample">载入示例</button>
+            <button class="secondary" id="loadExample" data-i18n="button.loadExample">载入示例</button>
           </div>
           <label class="field" title="当前选中的一个时间周期使用的 WaveDrom wave 字符。0/1 是低/高电平，p/n/P/N 是时钟，= 或 2-9 是数据总线段，x/z/u/d 是未知、高阻、上拉、下拉。">
-            <span>选中周期</span>
+            <span data-i18n="field.selectedCycle">选中周期</span>
             <select id="waveType">
               <optgroup label="电平">
                 <option value="0">低电平 0</option>
@@ -133,23 +134,23 @@
             <div class="wave-help" id="waveHelp" aria-live="polite"></div>
           </label>
           <label class="field" title="只对数据总线段生效。通常 wave 字符为 = 或 2-9 时，标签会显示在该周期中间。">
-            <span>标签文字</span>
-            <input id="cycleLabel" placeholder="例如 ACK / 0x3A" />
+            <span data-i18n="field.label">标签文字</span>
+            <input id="cycleLabel" placeholder="例如 ACK / 0x3A" data-i18n-placeholder="placeholder.label" />
           </label>
           <label class="field" title="单条信号的周期宽度倍率。默认 1；例如 DDR 时钟示例中 CK 使用 period: 2。">
-            <span>信号 period</span>
+            <span data-i18n="field.period">周期</span>
             <input type="number" id="signalPeriod" min="0.25" step="0.25" value="1" />
           </label>
           <label class="field" title="单条信号的水平相位偏移。默认 0；0.5 表示向右偏移半个周期，常用于 DDR 数据/命令示例。">
-            <span>信号 phase</span>
+            <span data-i18n="field.phase">相位</span>
             <input type="number" id="signalPhase" step="0.25" value="0" />
           </label>
           <label class="field" title="给当前选中的信号周期放一个节点字母，后面可以用这个字母做连线。比如在某个周期填 a，在另一个周期填 b，就可以连 a -> b。">
-            <span>当前周期节点</span>
-            <input id="cycleNode" maxlength="1" placeholder="例如 a" />
+            <span data-i18n="field.node">当前周期节点</span>
+            <input id="cycleNode" maxlength="1" placeholder="例如 a" data-i18n-placeholder="placeholder.node" />
           </label>
           <div class="edge-builder" title="用已经放好的节点字母创建连线。起点和终点填写 node 字母，线型选择箭头或曲线，文字会显示在线上。">
-            <span class="field-title">节点连线</span>
+            <span class="field-title" data-i18n="field.edges">节点连线</span>
             <div class="edge-grid">
               <input id="edgeFrom" maxlength="1" placeholder="起点 a" />
               <select id="edgeShape">
@@ -166,16 +167,16 @@
               <input id="edgeTo" maxlength="1" placeholder="终点 b" />
               <input id="edgeLabel" placeholder="文字" />
             </div>
-            <button class="secondary edge-add" id="addEdge">添加连线</button>
+            <button class="secondary edge-add" id="addEdge" data-i18n="button.addEdge">添加连线</button>
             <div class="edge-list" id="edgeList"></div>
           </div>
           <label class="field" title="横向缩放比例。默认 1；值越大，每个周期越宽，波形会横向拉长。对应 WaveDrom config: { hscale: N }。">
-            <span>横向缩放 hscale</span>
+            <span data-i18n="field.hscale">横向缩放 hscale</span>
             <input type="number" id="hscaleInput" min="1" max="100" step="1" value="1" />
             <small>控制每个周期的横向宽度，1 是默认，2 表示周期变宽一倍。</small>
           </label>
           <label class="field" title="WaveDrom 官方皮肤。default 是默认样式，dark 是深色，narrow/lowkey 是更紧凑或更低调的样式。">
-            <span>config.skin</span>
+            <span data-i18n="field.skin">config.skin</span>
             <select id="skinSelect">
               <option value="default">default</option>
               <option value="dark">dark</option>
@@ -184,11 +185,11 @@
             </select>
           </label>
           <label class="field" title="图形底部说明文字。对应 foot: { text: '...' }。复杂富文本示例可通过教程示例载入。">
-            <span>foot.text</span>
+            <span data-i18n="field.foot">foot.text</span>
             <input id="footText" placeholder="页脚文字" />
           </label>
           <div class="rich-text-builder" title="给图形标题 head.text 或页脚 foot.text 添加 WaveDrom 富文本片段。error、warning、info、success、muted 是官方教程 Step 7 里的彩色文字样式。">
-            <span class="field-title">标题/页脚富文本</span>
+            <span class="field-title" data-i18n="field.rich">标题/页脚富文本</span>
             <div class="rich-grid">
               <select id="richTarget">
                 <option value="head">标题 head</option>
@@ -205,7 +206,7 @@
               </select>
               <input id="richText" placeholder="文字，例如 warning" />
             </div>
-            <button class="secondary edge-add" id="addRichText">添加富文本</button>
+            <button class="secondary edge-add" id="addRichText" data-i18n="button.addRich">添加富文本</button>
             <div class="edge-list" id="richTextList"></div>
           </div>
           <input type="file" id="importJsonInput" accept=".js,.json,.json5,text/javascript,application/json" hidden />
@@ -213,15 +214,15 @@
 
           <div class="workspace">
             <div class="editor-toolbar">
-              <button class="secondary" data-view="home">主页</button>
+              <button class="secondary" data-view="home" data-i18n="button.home">主页</button>
             </div>
           <div class="signal-table" id="signalTable" aria-label="波形编辑器"></div>
           <section class="preview-panel">
             <div class="panel-title">
-              <span>实时预览</span>
+              <span data-i18n="panel.preview">实时预览</span>
               <div class="panel-actions">
-                <button class="panel-button" id="exportSvg" title="导出当前预览为 SVG 文件">导出 SVG</button>
-                <button class="panel-button" id="exportPng" title="导出当前预览为 PNG 图片">导出 PNG</button>
+                <button class="panel-button" id="exportSvg" title="导出当前预览为 SVG 文件" data-i18n="button.exportSvg">导出 SVG</button>
+                <button class="panel-button" id="exportPng" title="导出当前预览为 PNG 图片" data-i18n="button.exportPng">导出 PNG</button>
               </div>
             </div>
             <div id="wavePreview">
@@ -230,10 +231,10 @@
           </section>
           <section class="json-panel">
             <div class="panel-title">
-              <span>WaveJSON（官网教程语法）</span>
+              <span data-i18n="panel.wavejson">WaveJSON（官网教程语法）</span>
               <div class="panel-actions">
-                <button class="panel-button" id="importJson" title="导入 WaveDrom 官网语法文件，支持 .js/.json/.json5">导入</button>
-                <button class="panel-button" id="exportJson" title="导出当前图形的 WaveJSON 文件">导出</button>
+                <button class="panel-button" id="importJson" title="导入 WaveDrom 官网语法文件，支持 .js/.json/.json5" data-i18n="button.import">导入</button>
+                <button class="panel-button" id="exportJson" title="导出当前图形的 WaveJSON 文件" data-i18n="button.export">导出</button>
               </div>
             </div>
             <pre id="jsonOutput"></pre>
