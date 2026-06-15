@@ -190,6 +190,16 @@
           </label>
           <div class="rich-text-builder" title="给图形标题 head.text 或页脚 foot.text 添加 WaveDrom 富文本片段。error、warning、info、success、muted 是官方教程 Step 7 里的彩色文字样式。">
             <span class="field-title" data-i18n="field.rich">标题/页脚富文本</span>
+            <div class="rich-offset-grid">
+              <label>
+                <span data-i18n="field.headTock">head.tock</span>
+                <input id="headTock" type="number" step="1" placeholder="0" />
+              </label>
+              <label>
+                <span data-i18n="field.footTock">foot.tock</span>
+                <input id="footTock" type="number" step="1" placeholder="0" />
+              </label>
+            </div>
             <div class="rich-grid">
               <select id="richTarget">
                 <option value="head">标题 head</option>
@@ -205,6 +215,22 @@
                 <option value="h6">h6</option>
               </select>
               <input id="richText" placeholder="文字，例如 warning" />
+              <input id="richFill" type="color" value="#000000" title="fill / 文字颜色" />
+              <input id="richFontSize" type="number" min="1" step="1" placeholder="字号" title="font-size" />
+              <input id="richDy" type="number" step="1" placeholder="dy 上下移动" title="dy: 负数上移，正数下移" />
+              <select id="richBaseline" title="baseline-shift / 上下标">
+                <option value="">普通</option>
+                <option value="super">上标</option>
+                <option value="sub">下标</option>
+              </select>
+              <select id="richDecoration" title="text-decoration">
+                <option value="">无装饰</option>
+                <option value="underline">下划线</option>
+                <option value="overline">上划线</option>
+                <option value="line-through">删除线</option>
+              </select>
+              <label class="rich-check"><input id="richBold" type="checkbox" /> <span>粗体</span></label>
+              <label class="rich-check"><input id="richItalic" type="checkbox" /> <span>斜体</span></label>
             </div>
             <button class="secondary edge-add" id="addRichText" data-i18n="button.addRich">添加富文本</button>
             <div class="edge-list" id="richTextList"></div>

@@ -585,6 +585,18 @@ h1 {
   gap: 8px;
 }
 
+.rich-offset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rich-offset-grid label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+
 .group-levels {
   display: grid;
   gap: 8px;
@@ -606,6 +618,7 @@ h1 {
 .edge-grid select,
 .group-builder input,
 .group-level-row button,
+.rich-offset-grid input,
 .rich-grid input,
 .rich-grid select {
   min-width: 0;
@@ -637,8 +650,29 @@ h1 {
   grid-template-columns: 1fr 1fr;
 }
 
-.rich-grid input {
+.rich-grid #richText {
   grid-column: 1 / -1;
+}
+
+.rich-check {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.rich-check input {
+  min-height: auto;
+  width: auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .edge-add {

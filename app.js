@@ -4,7 +4,9 @@ const state = {
   selected: { signal: 0, cycle: 5 },
   config: { hscale: 1, skin: "default" },
   edge: [],
+  headTock: "",
   foot: { text: "" },
+  footTock: "",
   richText: { head: [], foot: [] },
   rawSource: null,
   signals: [
@@ -245,6 +247,8 @@ const i18n = {
     "field.skin": "config.skin",
     "field.foot": "foot.text",
     "field.rich": "标题/页脚富文本",
+    "field.headTock": "标题偏移 head.tock",
+    "field.footTock": "页脚偏移 foot.tock",
     "button.undo": "撤销",
     "button.redo": "重做",
     "button.loadExample": "载入示例",
@@ -295,6 +299,8 @@ const i18n = {
     "field.skin": "config.skin",
     "field.foot": "foot.text",
     "field.rich": "Head / Foot Rich Text",
+    "field.headTock": "Head Offset head.tock",
+    "field.footTock": "Foot Offset foot.tock",
     "button.undo": "Undo",
     "button.redo": "Redo",
     "button.loadExample": "Load Example",
@@ -358,9 +364,18 @@ function cacheElements() {
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
+  els.headTock = document.querySelector("#headTock");
+  els.footTock = document.querySelector("#footTock");
   els.richTarget = document.querySelector("#richTarget");
   els.richStyle = document.querySelector("#richStyle");
   els.richText = document.querySelector("#richText");
+  els.richFill = document.querySelector("#richFill");
+  els.richFontSize = document.querySelector("#richFontSize");
+  els.richDy = document.querySelector("#richDy");
+  els.richBaseline = document.querySelector("#richBaseline");
+  els.richDecoration = document.querySelector("#richDecoration");
+  els.richBold = document.querySelector("#richBold");
+  els.richItalic = document.querySelector("#richItalic");
   els.richTextList = document.querySelector("#richTextList");
   els.importJsonInput = document.querySelector("#importJsonInput");
   els.donateDialog = document.querySelector("#donateDialog");
@@ -499,6 +514,20 @@ function bindEvents() {
   els.footText.addEventListener("input", (event) => {
     commit();
     state.foot.text = event.target.value;
+    state.rawSource = null;
+    renderAll();
+  });
+
+  els.headTock.addEventListener("input", (event) => {
+    commit();
+    state.headTock = event.target.value;
+    state.rawSource = null;
+    renderAll();
+  });
+
+  els.footTock.addEventListener("input", (event) => {
+    commit();
+    state.footTock = event.target.value;
     state.rawSource = null;
     renderAll();
   });
@@ -681,6 +710,8 @@ function syncInspector() {
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
+  els.headTock.value = state.headTock ?? "";
+  els.footTock.value = state.footTock ?? "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
   renderGroupControls();
@@ -806,10 +837,36 @@ function addRichText() {
   }
   commit();
   const target = els.richTarget.value === "foot" ? "foot" : "head";
-  state.richText[target].push({ text, className: els.richStyle.value });
+  const attrs = richTextAttrsFromForm();
+  state.richText[target].push({ text, attrs });
   els.richText.value = "";
+  els.richFontSize.value = "";
+  els.richDy.value = "";
+  els.richBaseline.value = "";
+  els.richDecoration.value = "";
+  els.richBold.checked = false;
+  els.richItalic.checked = false;
   state.rawSource = null;
   renderAll();
+}
+
+function richTextAttrsFromForm() {
+  const attrs = {};
+  const className = els.richStyle.value.trim();
+  const fill = els.richFill.value;
+  const fontSize = Number(els.richFontSize.value);
+  const dy = Number(els.richDy.value);
+
+  if (className) attrs.class = className;
+  if (fill && fill.toLowerCase() !== "#000000") attrs.fill = fill;
+  if (Number.isFinite(fontSize) && fontSize > 0) attrs["font-size"] = String(fontSize);
+  if (Number.isFinite(dy) && dy !== 0) attrs.dy = String(dy);
+  if (els.richBaseline.value) attrs["baseline-shift"] = els.richBaseline.value;
+  if (els.richDecoration.value) attrs["text-decoration"] = els.richDecoration.value;
+  if (els.richBold.checked) attrs["font-weight"] = "bold";
+  if (els.richItalic.checked) attrs["font-style"] = "italic";
+
+  return attrs;
 }
 
 function removeRichTextAt(target, index) {
@@ -838,7 +895,7 @@ function renderRichTextList() {
     const row = document.createElement("div");
     row.className = "edge-item";
     const label = document.createElement("span");
-    label.textContent = `${item.target}.${item.className || "default"}: ${item.text}`;
+    label.textContent = `${item.target}.${richTextAttrsLabel(item.attrs || (item.className ? { class: item.className } : {}))}: ${item.text}`;
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = "删除";
@@ -846,6 +903,19 @@ function renderRichTextList() {
     row.append(label, button);
     els.richTextList.appendChild(row);
   });
+}
+
+function richTextAttrsLabel(attrs = {}) {
+  const parts = [];
+  if (attrs.class) parts.push(attrs.class);
+  if (attrs.fill) parts.push(attrs.fill);
+  if (attrs["font-size"]) parts.push(`${attrs["font-size"]}px`);
+  if (attrs.dy) parts.push(`dy ${attrs.dy}`);
+  if (attrs["baseline-shift"]) parts.push(attrs["baseline-shift"]);
+  if (attrs["text-decoration"]) parts.push(attrs["text-decoration"]);
+  if (attrs["font-weight"]) parts.push(attrs["font-weight"]);
+  if (attrs["font-style"]) parts.push(attrs["font-style"]);
+  return parts.join(", ") || "default";
 }
 
 function renderEdgeList() {
@@ -1112,9 +1182,15 @@ function toWaveDromSource() {
     },
   };
   source.head.text = richTextValue("head", state.title);
+  const headTock = numericOrBlank(state.headTock);
+  if (headTock !== "") source.head.tock = headTock;
 
   if (state.edge?.length) source.edge = state.edge;
-  if (state.foot?.text || state.richText.foot.length) source.foot = { text: richTextValue("foot", state.foot.text) };
+  const footTock = numericOrBlank(state.footTock);
+  if (state.foot?.text || state.richText.foot.length || footTock !== "") {
+    source.foot = { text: richTextValue("foot", state.foot.text) };
+    if (footTock !== "") source.foot.tock = footTock;
+  }
   if (state.config?.hscale !== 1 || state.config?.skin !== "default") {
     source.config = {};
     if (state.config.hscale !== 1) source.config.hscale = state.config.hscale;
@@ -1126,15 +1202,19 @@ function toWaveDromSource() {
 
 function applySource(source, fallbackTitle = "WaveDrom Tutorial Example") {
   const copy = structuredClone(source);
+  const headRich = parseRichTextValue(copy.head?.text, fallbackTitle);
+  const footRich = parseRichTextValue(copy.foot?.text, "");
   state.rawSource = hasComplexSource(copy) ? copy : null;
-  state.title = typeof copy.head?.text === "string" ? copy.head.text : fallbackTitle;
+  state.title = headRich.baseText;
   state.config = {
     hscale: copy.config?.hscale || 1,
     skin: copy.config?.skin || "default",
   };
   state.edge = Array.isArray(copy.edge) ? copy.edge.slice() : [];
-  state.foot = { text: typeof copy.foot?.text === "string" ? copy.foot.text : "" };
-  state.richText = { head: [], foot: [] };
+  state.headTock = copy.head?.tock ?? "";
+  state.foot = { text: footRich.baseText };
+  state.footTock = copy.foot?.tock ?? "";
+  state.richText = { head: headRich.items, foot: footRich.items };
   state.signals = flattenEditableSignals(copy.signal);
   if (!state.signals.length) {
     state.signals = [{ name: "signal_1", color: "#2563eb", wave: ["0"], data: [""], period: 1, phase: 0, node: "", groupPath: [] }];
@@ -1154,11 +1234,36 @@ function hasComplexSignal(signal) {
 function hasComplexSource(source) {
   return (
     hasComplexSignal(source.signal) ||
-    Array.isArray(source.head?.text) ||
-    Array.isArray(source.foot?.text) ||
     source.assign ||
     source.reg
   );
+}
+
+function parseRichTextValue(value, fallback = "") {
+  if (typeof value === "string") return { baseText: value, items: [] };
+  if (!Array.isArray(value) || value[0] !== "tspan") return { baseText: fallback, items: [] };
+
+  const result = { baseText: "", items: [] };
+  value.slice(1).forEach((part) => {
+    if (typeof part === "string") {
+      result.baseText += part;
+      return;
+    }
+    if (!Array.isArray(part) || part[0] !== "tspan") return;
+
+    let attrs = {};
+    let text = "";
+    if (part[1] && typeof part[1] === "object" && !Array.isArray(part[1])) {
+      attrs = { ...part[1] };
+      text = String(part[2] ?? "");
+    } else {
+      text = String(part[1] ?? "");
+    }
+    result.items.push({ text: text.trimEnd(), attrs });
+  });
+
+  result.baseText = result.baseText.trimEnd() || fallback;
+  return result;
 }
 
 function flattenEditableSignals(signal) {
@@ -1266,6 +1371,12 @@ function dataValuesForSignal(signal) {
   }, []);
 }
 
+function numericOrBlank(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  const number = Number(value);
+  return Number.isFinite(number) ? number : "";
+}
+
 function richTextValue(target, fallback) {
   const items = state.richText[target] || [];
   if (!items.length) return fallback || "";
@@ -1273,8 +1384,9 @@ function richTextValue(target, fallback) {
     "tspan",
     ...(fallback ? [fallback.endsWith(" ") ? fallback : `${fallback} `] : []),
     ...items.map((item) => {
-      if (!item.className) return ["tspan", item.text.endsWith(" ") ? item.text : `${item.text} `];
-      return ["tspan", { class: item.className }, item.text.endsWith(" ") ? item.text : `${item.text} `];
+      const text = item.text.endsWith(" ") ? item.text : `${item.text} `;
+      const attrs = item.attrs || (item.className ? { class: item.className } : {});
+      return Object.keys(attrs).length ? ["tspan", attrs, text] : ["tspan", text];
     }),
   ];
 }
