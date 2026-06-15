@@ -587,7 +587,7 @@ h1 {
 
 .rich-offset-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -654,25 +654,47 @@ h1 {
   grid-column: 1 / -1;
 }
 
-.rich-check {
+.rich-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rich-tool {
+  width: 38px;
   min-height: 38px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0 8px;
+  padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.rich-check input {
-  min-height: auto;
-  width: auto;
-  border: 0;
-  padding: 0;
-  background: transparent;
+.rich-tool:hover,
+.rich-tool.is-active {
+  border-color: var(--accent);
+  background: rgba(24, 107, 135, 0.12);
+  color: var(--accent);
+}
+
+.tool-underline {
+  text-decoration: underline;
+}
+
+.tool-overline {
+  text-decoration: overline;
+}
+
+.tool-strike {
+  text-decoration: line-through;
 }
 
 .edge-add {

@@ -192,11 +192,7 @@
             <span class="field-title" data-i18n="field.rich">标题/页脚富文本</span>
             <div class="rich-offset-grid">
               <label>
-                <span data-i18n="field.headTock">head.tock</span>
-                <input id="headTock" type="number" step="1" placeholder="0" />
-              </label>
-              <label>
-                <span data-i18n="field.footTock">foot.tock</span>
+                <span data-i18n="field.footTock">页脚偏移 foot.tock</span>
                 <input id="footTock" type="number" step="1" placeholder="0" />
               </label>
             </div>
@@ -216,21 +212,21 @@
               </select>
               <input id="richText" placeholder="文字，例如 warning" />
               <input id="richFill" type="color" value="#000000" title="fill / 文字颜色" />
-              <input id="richFontSize" type="number" min="1" step="1" placeholder="字号" title="font-size" />
+              <input id="richFontSize" type="number" min="1" step="1" value="14" title="font-size / 默认字号 14" />
               <input id="richDy" type="number" step="1" placeholder="dy 上下移动" title="dy: 负数上移，正数下移" />
               <select id="richBaseline" title="baseline-shift / 上下标">
                 <option value="">普通</option>
                 <option value="super">上标</option>
                 <option value="sub">下标</option>
               </select>
-              <select id="richDecoration" title="text-decoration">
-                <option value="">无装饰</option>
-                <option value="underline">下划线</option>
-                <option value="overline">上划线</option>
-                <option value="line-through">删除线</option>
-              </select>
-              <label class="rich-check"><input id="richBold" type="checkbox" /> <span>粗体</span></label>
-              <label class="rich-check"><input id="richItalic" type="checkbox" /> <span>斜体</span></label>
+              <input id="richDecoration" type="hidden" value="" />
+              <div class="rich-toolbar" aria-label="富文本样式工具栏">
+                <button class="rich-tool" id="richBold" type="button" title="粗体" aria-pressed="false"><strong>B</strong></button>
+                <button class="rich-tool" id="richItalic" type="button" title="斜体" aria-pressed="false"><em>I</em></button>
+                <button class="rich-tool" type="button" data-rich-decoration="underline" title="下划线" aria-pressed="false"><span class="tool-underline">U</span></button>
+                <button class="rich-tool" type="button" data-rich-decoration="overline" title="上划线" aria-pressed="false"><span class="tool-overline">O</span></button>
+                <button class="rich-tool" type="button" data-rich-decoration="line-through" title="删除线" aria-pressed="false"><span class="tool-strike">S</span></button>
+              </div>
             </div>
             <button class="secondary edge-add" id="addRichText" data-i18n="button.addRich">添加富文本</button>
             <div class="edge-list" id="richTextList"></div>

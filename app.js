@@ -4,7 +4,6 @@ const state = {
   selected: { signal: 0, cycle: 5 },
   config: { hscale: 1, skin: "default" },
   edge: [],
-  headTock: "",
   foot: { text: "" },
   footTock: "",
   richText: { head: [], foot: [] },
@@ -16,6 +15,7 @@ const state = {
   ],
 };
 
+const DEFAULT_RICH_FONT_SIZE = 14;
 const tutorialExamples = [
   {
     title: "Step 1: The Signal",
@@ -247,7 +247,6 @@ const i18n = {
     "field.skin": "config.skin",
     "field.foot": "foot.text",
     "field.rich": "标题/页脚富文本",
-    "field.headTock": "标题偏移 head.tock",
     "field.footTock": "页脚偏移 foot.tock",
     "button.undo": "撤销",
     "button.redo": "重做",
@@ -299,7 +298,6 @@ const i18n = {
     "field.skin": "config.skin",
     "field.foot": "foot.text",
     "field.rich": "Head / Foot Rich Text",
-    "field.headTock": "Head Offset head.tock",
     "field.footTock": "Foot Offset foot.tock",
     "button.undo": "Undo",
     "button.redo": "Redo",
@@ -364,7 +362,6 @@ function cacheElements() {
   els.hscaleInput = document.querySelector("#hscaleInput");
   els.skinSelect = document.querySelector("#skinSelect");
   els.footText = document.querySelector("#footText");
-  els.headTock = document.querySelector("#headTock");
   els.footTock = document.querySelector("#footTock");
   els.richTarget = document.querySelector("#richTarget");
   els.richStyle = document.querySelector("#richStyle");
@@ -474,6 +471,7 @@ function bindEvents() {
   });
 
   document.querySelector("#addEdge").addEventListener("click", addEdgeFromForm);
+  bindRichToolbar();
 
   els.groupLevels.addEventListener("input", updateSelectedGroupFromForm);
   els.groupLevels.addEventListener("click", (event) => {
@@ -518,19 +516,43 @@ function bindEvents() {
     renderAll();
   });
 
-  els.headTock.addEventListener("input", (event) => {
-    commit();
-    state.headTock = event.target.value;
-    state.rawSource = null;
-    renderAll();
-  });
-
   els.footTock.addEventListener("input", (event) => {
     commit();
     state.footTock = event.target.value;
     state.rawSource = null;
     renderAll();
   });
+}
+
+function bindRichToolbar() {
+  els.richBold.addEventListener("click", () => toggleRichButton(els.richBold));
+  els.richItalic.addEventListener("click", () => toggleRichButton(els.richItalic));
+
+  document.querySelectorAll("[data-rich-decoration]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextValue = els.richDecoration.value === button.dataset.richDecoration ? "" : button.dataset.richDecoration;
+      els.richDecoration.value = nextValue;
+      document.querySelectorAll("[data-rich-decoration]").forEach((item) => {
+        const active = item.dataset.richDecoration === nextValue;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+    });
+  });
+}
+
+function toggleRichButton(button) {
+  const active = button.getAttribute("aria-pressed") !== "true";
+  button.classList.toggle("is-active", active);
+  button.setAttribute("aria-pressed", String(active));
+}
+
+function resetRichToolbar() {
+  [els.richBold, els.richItalic, ...document.querySelectorAll("[data-rich-decoration]")].forEach((button) => {
+    button.classList.remove("is-active");
+    button.setAttribute("aria-pressed", "false");
+  });
+  els.richDecoration.value = "";
 }
 
 function setView(view) {
@@ -710,7 +732,6 @@ function syncInspector() {
   els.hscaleInput.value = state.config?.hscale || 1;
   els.skinSelect.value = state.config?.skin || "default";
   els.footText.value = state.foot?.text || "";
-  els.headTock.value = state.headTock ?? "";
   els.footTock.value = state.footTock ?? "";
   renderWaveHelp(cycle.wave);
   renderEdgeList();
@@ -840,12 +861,10 @@ function addRichText() {
   const attrs = richTextAttrsFromForm();
   state.richText[target].push({ text, attrs });
   els.richText.value = "";
-  els.richFontSize.value = "";
+  els.richFontSize.value = String(DEFAULT_RICH_FONT_SIZE);
   els.richDy.value = "";
   els.richBaseline.value = "";
-  els.richDecoration.value = "";
-  els.richBold.checked = false;
-  els.richItalic.checked = false;
+  resetRichToolbar();
   state.rawSource = null;
   renderAll();
 }
@@ -859,12 +878,12 @@ function richTextAttrsFromForm() {
 
   if (className) attrs.class = className;
   if (fill && fill.toLowerCase() !== "#000000") attrs.fill = fill;
-  if (Number.isFinite(fontSize) && fontSize > 0) attrs["font-size"] = String(fontSize);
+  if (Number.isFinite(fontSize) && fontSize > 0 && fontSize !== DEFAULT_RICH_FONT_SIZE) attrs["font-size"] = String(fontSize);
   if (Number.isFinite(dy) && dy !== 0) attrs.dy = String(dy);
   if (els.richBaseline.value) attrs["baseline-shift"] = els.richBaseline.value;
   if (els.richDecoration.value) attrs["text-decoration"] = els.richDecoration.value;
-  if (els.richBold.checked) attrs["font-weight"] = "bold";
-  if (els.richItalic.checked) attrs["font-style"] = "italic";
+  if (els.richBold.getAttribute("aria-pressed") === "true") attrs["font-weight"] = "bold";
+  if (els.richItalic.getAttribute("aria-pressed") === "true") attrs["font-style"] = "italic";
 
   return attrs;
 }
@@ -1182,8 +1201,6 @@ function toWaveDromSource() {
     },
   };
   source.head.text = richTextValue("head", state.title);
-  const headTock = numericOrBlank(state.headTock);
-  if (headTock !== "") source.head.tock = headTock;
 
   if (state.edge?.length) source.edge = state.edge;
   const footTock = numericOrBlank(state.footTock);
@@ -1211,7 +1228,6 @@ function applySource(source, fallbackTitle = "WaveDrom Tutorial Example") {
     skin: copy.config?.skin || "default",
   };
   state.edge = Array.isArray(copy.edge) ? copy.edge.slice() : [];
-  state.headTock = copy.head?.tock ?? "";
   state.foot = { text: footRich.baseText };
   state.footTock = copy.foot?.tock ?? "";
   state.richText = { head: headRich.items, foot: footRich.items };
