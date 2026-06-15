@@ -222,18 +222,25 @@ const els = {};
 const i18n = {
   zh: {
     "nav.docs": "说明文档",
-    "nav.start": "快速开始",
+    "nav.editor": "编辑器",
     "nav.support": "作者/支持",
     "nav.donate": "支持作者",
     "hero.eyebrow": "Online timing diagram editor",
     "hero.title": "WaveDrom 在线可视化编辑器",
-    "hero.text": "用图形化方式创建、修改和导出时序波形。主页保持简洁入口，编辑器负责完整的行、周期和标签编辑。",
-    "docs.title": "说明文档",
-    "docs.text": "支持新增信号行、编辑周期、修改标签、导出 WaveDrom JSON 与 SVG。后续可接入账号和云端保存。",
-    "license.title": "许可声明",
+    "hero.text": "一个简洁的 WaveDrom 可视化编辑器。用表格编辑信号，用官方渲染器实时预览，并导出 WaveJSON、SVG 或 PNG。",
+    "docs.title": "功能",
+    "docs.text": "支持周期编辑、信号分组、节点连线、富文本标题、官方教程示例、WaveJSON 导入导出，以及 SVG/PNG 导出。",
+    "license.title": "许可",
     "license.text": "本项目使用 WaveDrom JS，遵循 MIT License。用户生成的波形内容版权归用户所有。",
-    "support.title": "作者/支持",
-    "support.text": "通过顶部“支持作者”入口打开支持信息，可配置支付宝、微信、PayPal 或 Stripe 链接。",
+    "support.title": "支持",
+    "support.text": "如果这个工具节省了你的时间，可以通过顶部 Support 入口支持项目继续维护。",
+    "group.document": "文档",
+    "group.examples": "示例",
+    "group.cycle": "周期",
+    "group.nodes": "节点与连线",
+    "group.groups": "信号分组",
+    "group.appearance": "外观",
+    "group.text": "文字",
     "field.docTitle": "文档标题",
     "field.examples": "教程示例",
     "field.selectedCycle": "选中周期",
@@ -249,7 +256,7 @@ const i18n = {
     "field.rich": "标题/页脚富文本",
     "field.footTock": "页脚偏移 foot.tock",
     "button.undo": "撤销",
-    "button.redo": "重做",
+    "button.redo": "恢复",
     "button.loadExample": "载入示例",
     "button.addEdge": "添加连线",
     "button.addRich": "添加富文本",
@@ -264,7 +271,7 @@ const i18n = {
     "button.select": "选中",
     "option.current": "当前图形",
     "panel.preview": "实时预览",
-    "panel.wavejson": "WaveJSON（官网教程语法）",
+    "panel.wavejson": "WaveJSON",
     "placeholder.label": "例如 ACK / 0x3A",
     "placeholder.node": "例如 a",
     "placeholder.group": "第 {n} 级分组",
@@ -273,18 +280,25 @@ const i18n = {
   },
   en: {
     "nav.docs": "Docs",
-    "nav.start": "Start",
+    "nav.editor": "Editor",
     "nav.support": "Author / Support",
     "nav.donate": "Support",
     "hero.eyebrow": "Online timing diagram editor",
     "hero.title": "WaveDrom Visual Editor",
-    "hero.text": "Create, edit, preview, and export WaveDrom timing diagrams through a visual UI.",
-    "docs.title": "Docs",
-    "docs.text": "Add signals, edit cycles, change labels, and export WaveDrom JSON, SVG, or PNG.",
+    "hero.text": "A focused visual editor for WaveDrom. Edit signals in a grid, preview with the official renderer, and export WaveJSON, SVG, or PNG.",
+    "docs.title": "Features",
+    "docs.text": "Edit cycles, group signals, connect nodes, format rich text, load official tutorial examples, import/export WaveJSON, and export SVG/PNG.",
     "license.title": "License",
     "license.text": "This project uses WaveDrom JS under the MIT License. Diagrams created by users belong to users.",
-    "support.title": "Author / Support",
-    "support.text": "Use the Support button in the top bar to open donation and payment information.",
+    "support.title": "Support",
+    "support.text": "If this editor saves you time, use Support in the top bar to help maintain the project.",
+    "group.document": "Document",
+    "group.examples": "Examples",
+    "group.cycle": "Cycle",
+    "group.nodes": "Nodes & Edges",
+    "group.groups": "Signal Groups",
+    "group.appearance": "Appearance",
+    "group.text": "Text",
     "field.docTitle": "Document Title",
     "field.examples": "Tutorial Examples",
     "field.selectedCycle": "Selected Cycle",
@@ -300,7 +314,7 @@ const i18n = {
     "field.rich": "Head / Foot Rich Text",
     "field.footTock": "Foot Offset foot.tock",
     "button.undo": "Undo",
-    "button.redo": "Redo",
+    "button.redo": "Recover",
     "button.loadExample": "Load Example",
     "button.addEdge": "Add Edge",
     "button.addRich": "Add Rich Text",
@@ -315,7 +329,7 @@ const i18n = {
     "button.select": "Select",
     "option.current": "Current Diagram",
     "panel.preview": "Live Preview",
-    "panel.wavejson": "WaveJSON (official tutorial syntax)",
+    "panel.wavejson": "WaveJSON",
     "placeholder.label": "e.g. ACK / 0x3A",
     "placeholder.node": "e.g. a",
     "placeholder.group": "Group level {n}",
@@ -402,6 +416,11 @@ function ensureGroupEditor() {
     <small data-i18n="group.help">可以自由添加多级嵌套分组；导出时会生成 WaveDrom 官方嵌套 signal 数组。</small>
     <div class="edge-list" id="groupList"></div>
   `;
+  const mount = document.querySelector("#groupEditorMount");
+  if (mount) {
+    mount.appendChild(panel);
+    return;
+  }
   const edgePanel = document.querySelector("#edgeList")?.parentElement;
   edgePanel?.insertAdjacentElement("afterend", panel);
 }
@@ -412,7 +431,12 @@ function bindEvents() {
   });
 
   document.querySelectorAll("[data-view]").forEach((button) => {
-    button.addEventListener("click", () => setView(button.dataset.view));
+    button.addEventListener("click", () => {
+      setView(button.dataset.view);
+      if (button.dataset.anchor) {
+        requestAnimationFrame(() => document.querySelector(`#${button.dataset.anchor}`)?.scrollIntoView({ behavior: "smooth" }));
+      }
+    });
   });
 
   document.querySelectorAll("[data-donate]").forEach((button) => {
@@ -581,6 +605,11 @@ function applyLanguage() {
   });
   document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
     element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    const title = t(element.dataset.i18nTitle);
+    element.title = title;
+    element.setAttribute("aria-label", title);
   });
   if (els.langToggle) {
     els.langToggle.textContent = state.language === "zh" ? "EN" : "中";

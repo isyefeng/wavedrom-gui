@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WaveDrom GUI SaaS</title>
+    <title>WaveDrom GUI</title>
     <link rel="icon" href="./assets/wavedrom-gui-icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./vendor/wavedrom/skins/default.js" defer></script>
@@ -20,19 +20,19 @@
         <span>WaveDrom GUI</span>
       </button>
       <nav class="nav">
-        <a href="#docs" data-i18n="nav.docs">说明文档</a>
-        <button data-start data-i18n="nav.start">快速开始</button>
-        <a href="#support" data-i18n="nav.support">作者/支持</a>
+        <button data-view="home" data-i18n="button.home">主页</button>
+        <button data-start data-i18n="nav.editor">编辑器</button>
+        <button data-view="home" data-anchor="docs" data-i18n="nav.docs">说明文档</button>
+        <button data-donate data-i18n="nav.support">作者/支持</button>
       </nav>
       <div class="top-actions">
         <button class="icon-button" id="themeToggle" aria-label="切换主题" title="切换主题">◐</button>
         <button class="icon-button" id="langToggle" aria-label="Switch language" title="Switch language">EN</button>
-        <button class="donate-button" data-donate data-i18n="nav.donate">支持作者</button>
       </div>
     </header>
 
     <main>
-      <section class="home-view" id="homeView">
+      <section class="home-view is-hidden" id="homeView">
         <div class="hero">
           <div class="hero-copy">
             <p class="eyebrow" data-i18n="hero.eyebrow">Online timing diagram editor</p>
@@ -40,9 +40,6 @@
             <p class="hero-text" data-i18n="hero.text">
               用图形化方式创建、修改和导出时序波形。主页保持简洁入口，编辑器负责完整的行、周期和标签编辑。
             </p>
-            <div class="hero-actions">
-              <button class="primary" data-start data-i18n="nav.start">快速开始</button>
-            </div>
           </div>
           <div class="hero-preview" aria-label="波形示意图">
             <svg viewBox="0 0 620 300" role="img">
@@ -74,30 +71,40 @@
           </div>
           <div id="support">
             <h2 data-i18n="support.title">作者/支持</h2>
-            <p data-i18n="support.text">通过顶部“支持作者”入口打开支持信息，可配置支付宝、微信、PayPal 或 Stripe 链接。</p>
+            <p data-i18n="support.text">如果这个工具节省了你的时间，可以通过顶部 Support 入口支持项目继续维护。</p>
           </div>
         </section>
       </section>
 
-      <section class="editor-view is-hidden" id="editorView">
+      <section class="editor-view" id="editorView">
         <aside class="sidebar">
-          <label class="field">
-            <span data-i18n="field.docTitle">文档标题</span>
-            <input id="docTitle" value="Untitled Timing Diagram" />
-          </label>
-          <div class="button-row">
-            <button class="secondary" id="undoBtn" data-i18n="button.undo">撤销</button>
-            <button class="secondary" id="redoBtn" data-i18n="button.redo">重做</button>
-          </div>
-          <label class="field" title="WaveDrom 教程中的官方示例。载入后可查看对应图形，并继续编辑普通信号行。">
-            <span data-i18n="field.examples">教程示例</span>
-            <select id="exampleSelect">
-              <option value="" data-i18n="option.current">当前图形</option>
-            </select>
-          </label>
-          <div class="button-row">
-            <button class="secondary" id="loadExample" data-i18n="button.loadExample">载入示例</button>
-          </div>
+          <details class="side-group" open>
+            <summary data-i18n="group.document">文档</summary>
+            <label class="field">
+              <span data-i18n="field.docTitle">文档标题</span>
+              <input id="docTitle" value="Untitled Timing Diagram" />
+            </label>
+            <div class="button-row tool-row">
+              <button class="icon-action" id="undoBtn" title="撤销" data-i18n-title="button.undo">↶</button>
+              <button class="icon-action" id="redoBtn" title="恢复" data-i18n-title="button.redo">↷</button>
+            </div>
+          </details>
+
+          <details class="side-group">
+            <summary data-i18n="group.examples">示例</summary>
+            <label class="field" title="WaveDrom 教程中的官方示例。载入后可查看对应图形，并继续编辑普通信号行。">
+              <span data-i18n="field.examples">教程示例</span>
+              <select id="exampleSelect">
+                <option value="" data-i18n="option.current">当前图形</option>
+              </select>
+            </label>
+            <div class="button-row">
+              <button class="secondary" id="loadExample" data-i18n="button.loadExample">载入示例</button>
+            </div>
+          </details>
+
+          <details class="side-group" open>
+            <summary data-i18n="group.cycle">周期</summary>
           <label class="field" title="当前选中的一个时间周期使用的 WaveDrom wave 字符。0/1 是低/高电平，p/n/P/N 是时钟，= 或 2-9 是数据总线段，x/z/u/d 是未知、高阻、上拉、下拉。">
             <span data-i18n="field.selectedCycle">选中周期</span>
             <select id="waveType">
@@ -145,6 +152,10 @@
             <span data-i18n="field.phase">相位</span>
             <input type="number" id="signalPhase" step="0.25" value="0" />
           </label>
+          </details>
+
+          <details class="side-group">
+            <summary data-i18n="group.nodes">节点与连线</summary>
           <label class="field" title="给当前选中的信号周期放一个节点字母，后面可以用这个字母做连线。比如在某个周期填 a，在另一个周期填 b，就可以连 a -> b。">
             <span data-i18n="field.node">当前周期节点</span>
             <input id="cycleNode" maxlength="1" placeholder="例如 a" data-i18n-placeholder="placeholder.node" />
@@ -170,6 +181,15 @@
             <button class="secondary edge-add" id="addEdge" data-i18n="button.addEdge">添加连线</button>
             <div class="edge-list" id="edgeList"></div>
           </div>
+          </details>
+
+          <details class="side-group">
+            <summary data-i18n="group.groups">信号分组</summary>
+            <div id="groupEditorMount"></div>
+          </details>
+
+          <details class="side-group">
+            <summary data-i18n="group.appearance">外观</summary>
           <label class="field" title="横向缩放比例。默认 1；值越大，每个周期越宽，波形会横向拉长。对应 WaveDrom config: { hscale: N }。">
             <span data-i18n="field.hscale">横向缩放 hscale</span>
             <input type="number" id="hscaleInput" min="1" max="100" step="1" value="1" />
@@ -184,6 +204,10 @@
               <option value="lowkey">lowkey</option>
             </select>
           </label>
+          </details>
+
+          <details class="side-group">
+            <summary data-i18n="group.text">文字</summary>
           <label class="field" title="图形底部说明文字。对应 foot: { text: '...' }。复杂富文本示例可通过教程示例载入。">
             <span data-i18n="field.foot">foot.text</span>
             <input id="footText" placeholder="页脚文字" />
@@ -231,13 +255,11 @@
             <button class="secondary edge-add" id="addRichText" data-i18n="button.addRich">添加富文本</button>
             <div class="edge-list" id="richTextList"></div>
           </div>
+          </details>
           <input type="file" id="importJsonInput" accept=".js,.json,.json5,text/javascript,application/json" hidden />
         </aside>
 
           <div class="workspace">
-            <div class="editor-toolbar">
-              <button class="secondary" data-view="home" data-i18n="button.home">主页</button>
-            </div>
           <div class="signal-table" id="signalTable" aria-label="波形编辑器"></div>
           <section class="preview-panel">
             <div class="panel-title">
@@ -253,7 +275,7 @@
           </section>
           <section class="json-panel">
             <div class="panel-title">
-              <span data-i18n="panel.wavejson">WaveJSON（官网教程语法）</span>
+              <span data-i18n="panel.wavejson">WaveJSON</span>
               <div class="panel-actions">
                 <button class="panel-button" id="importJson" title="导入 WaveDrom 官网语法文件，支持 .js/.json/.json5" data-i18n="button.import">导入</button>
                 <button class="panel-button" id="exportJson" title="导出当前图形的 WaveJSON 文件" data-i18n="button.export">导出</button>
@@ -271,7 +293,7 @@
           <h2>支持作者</h2>
           <button aria-label="关闭">×</button>
         </div>
-        <p>这里可以替换为你的支付宝、微信、PayPal 或 Stripe 收款信息。</p>
+        <p>WaveDrom GUI is an independent editor. If it saves you time, you can support the project with a small donation.</p>
         <div class="donate-grid">
           <div class="qr-card">
             <img class="qr" src="image/zhifubao.jpg" alt="支付宝收款码" />
@@ -281,10 +303,6 @@
             <img class="qr" src="image/weixin.jpg" alt="微信收款码" />
             <span>扫码支持</span>
           </div>
-        </div>
-        <div class="payment-links">
-          <a href="https://www.paypal.com/" target="_blank" rel="noreferrer">PayPal</a>
-          <a href="https://stripe.com/" target="_blank" rel="noreferrer">Stripe</a>
         </div>
       </form>
     </dialog>
