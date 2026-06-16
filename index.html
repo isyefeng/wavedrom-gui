@@ -13,15 +13,15 @@
     <script src="./vendor/wavedrom/wavedrom.min.js" defer></script>
     <script src="./app.js" defer></script>
   </head>
-  <body>
+  <body class="is-home-page">
     <header class="topbar">
       <button class="brand" data-view="home" aria-label="返回主页">
         <img class="brand-mark" src="./assets/wavedrom-gui-icon.svg" alt="" />
         <span>WaveDrom GUI</span>
       </button>
       <nav class="nav">
-        <button data-view="home" data-i18n="button.home">主页</button>
-        <button data-start data-i18n="nav.editor">编辑器</button>
+        <button class="nav-home" data-view="home" data-i18n="button.home">主页</button>
+        <button class="nav-start" data-start data-i18n="nav.start">快速开始</button>
         <button data-view="home" data-anchor="docs" data-i18n="nav.docs">说明文档</button>
         <button data-donate data-i18n="nav.support">作者/支持</button>
       </nav>
@@ -32,7 +32,7 @@
     </header>
 
     <main>
-      <section class="home-view is-hidden" id="homeView">
+      <section class="home-view" id="homeView">
         <div class="hero">
           <div class="hero-copy">
             <p class="eyebrow" data-i18n="hero.eyebrow">Online timing diagram editor</p>
@@ -40,6 +40,9 @@
             <p class="hero-text" data-i18n="hero.text">
               用图形化方式创建、修改和导出时序波形。主页保持简洁入口，编辑器负责完整的行、周期和标签编辑。
             </p>
+            <div class="hero-actions">
+              <button class="primary" data-start data-i18n="nav.start">快速开始</button>
+            </div>
           </div>
           <div class="hero-preview" aria-label="波形示意图">
             <svg viewBox="0 0 620 300" role="img">
@@ -76,13 +79,17 @@
         </section>
       </section>
 
-      <section class="editor-view" id="editorView">
+      <section class="editor-view is-hidden" id="editorView">
         <aside class="sidebar">
           <details class="side-group" open>
             <summary data-i18n="group.document">文档</summary>
             <label class="field">
               <span data-i18n="field.docTitle">文档标题</span>
               <input id="docTitle" value="Untitled Timing Diagram" />
+            </label>
+            <label class="field" title="图形底部说明文字。对应 foot: { text: '...' }。复杂富文本示例可通过教程示例载入。">
+              <span data-i18n="field.foot">页脚文字</span>
+              <input id="footText" placeholder="页脚文字" />
             </label>
             <div class="button-row tool-row">
               <button class="icon-action" id="undoBtn" title="撤销" data-i18n-title="button.undo">↶</button>
@@ -191,12 +198,12 @@
           <details class="side-group">
             <summary data-i18n="group.appearance">外观</summary>
           <label class="field" title="横向缩放比例。默认 1；值越大，每个周期越宽，波形会横向拉长。对应 WaveDrom config: { hscale: N }。">
-            <span data-i18n="field.hscale">横向缩放 hscale</span>
+            <span data-i18n="field.hscale">横向缩放</span>
             <input type="number" id="hscaleInput" min="1" max="100" step="1" value="1" />
             <small>控制每个周期的横向宽度，1 是默认，2 表示周期变宽一倍。</small>
           </label>
           <label class="field" title="WaveDrom 官方皮肤。default 是默认样式，dark 是深色，narrow/lowkey 是更紧凑或更低调的样式。">
-            <span data-i18n="field.skin">config.skin</span>
+            <span data-i18n="field.skin">皮肤样式</span>
             <select id="skinSelect">
               <option value="default">default</option>
               <option value="dark">dark</option>
@@ -208,15 +215,11 @@
 
           <details class="side-group">
             <summary data-i18n="group.text">文字</summary>
-          <label class="field" title="图形底部说明文字。对应 foot: { text: '...' }。复杂富文本示例可通过教程示例载入。">
-            <span data-i18n="field.foot">foot.text</span>
-            <input id="footText" placeholder="页脚文字" />
-          </label>
           <div class="rich-text-builder" title="给图形标题 head.text 或页脚 foot.text 添加 WaveDrom 富文本片段。error、warning、info、success、muted 是官方教程 Step 7 里的彩色文字样式。">
             <span class="field-title" data-i18n="field.rich">标题/页脚富文本</span>
             <div class="rich-offset-grid">
               <label>
-                <span data-i18n="field.footTock">页脚偏移 foot.tock</span>
+                <span data-i18n="field.footTock">页脚偏移</span>
                 <input id="footTock" type="number" step="1" placeholder="0" />
               </label>
             </div>
@@ -290,18 +293,22 @@
     <dialog class="donate-dialog" id="donateDialog">
       <form method="dialog">
         <div class="dialog-head">
-          <h2>支持作者</h2>
+          <h2 data-i18n="supportDialog.title">支持与反馈</h2>
           <button aria-label="关闭">×</button>
         </div>
-        <p>WaveDrom GUI is an independent editor. If it saves you time, you can support the project with a small donation.</p>
+        <p data-i18n="supportDialog.text">遇到问题或有建议，可以在 GitHub Issues 反馈。觉得项目有帮助，也可以扫码支持维护。</p>
+        <div class="support-links">
+          <a href="https://github.com/isyefeng/wavedrom-gui/issues" target="_blank" rel="noreferrer" data-i18n="supportDialog.issues">提交问题</a>
+          <a href="https://github.com/isyefeng/wavedrom-gui" target="_blank" rel="noreferrer" data-i18n="supportDialog.source">项目源码</a>
+        </div>
         <div class="donate-grid">
           <div class="qr-card">
             <img class="qr" src="image/zhifubao.jpg" alt="支付宝收款码" />
-            <span>扫码打赏</span>
+            <span data-i18n="supportDialog.alipay">支付宝</span>
           </div>
           <div class="qr-card">
             <img class="qr" src="image/weixin.jpg" alt="微信收款码" />
-            <span>扫码支持</span>
+            <span data-i18n="supportDialog.wechat">微信</span>
           </div>
         </div>
       </form>
