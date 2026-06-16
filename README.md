@@ -1,73 +1,87 @@
-# WaveDrom GUI SaaS Prototype
+# WaveDrom GUI
 
-这是一个零构建依赖的静态原型，用于验证 WaveDrom 在线可视化编辑器的主页、打赏入口和基础编辑器交互。
+WaveDrom GUI 是一个面向时序图绘制的在线可视化编辑器。它基于 [WaveDrom](https://wavedrom.com/) 官方渲染器，把 WaveJSON 语法转换成更容易上手的图形化界面：编辑信号行、修改周期、添加数据标签、创建分组和节点连线，然后实时预览并导出结果。
 
-## 使用方式
+在线访问：[https://isyefeng.github.io/wavedrom-gui/](https://isyefeng.github.io/wavedrom-gui/)
 
-直接用浏览器打开 `index.html`。
+## 适合谁使用
 
-## 已实现
+- 数字电路、FPGA、芯片验证、嵌入式和通信协议相关开发者。
+- 需要快速绘制时钟、数据总线、valid/ready、握手时序图的人。
+- 想使用 WaveDrom 官方语法，但不想纯手写 WaveJSON 的用户。
 
-- 主页导航：说明文档、快速开始、作者/支持
-- 打赏入口：顶部、主页按钮、编辑器按钮，弹窗展示支付宝/微信占位二维码与 PayPal/Stripe 链接
-- 编辑器：文档标题、信号行、周期新增、周期类型编辑、标签编辑、period/phase、node/edge、hscale、skin、foot.text
-- 周期编辑：每个信号行尾部 `+` 在当前选中周期后插入，`-` 删除当前选中周期
-- 信号行编辑：信号表底部 `+ 新增信号行` 新增信号，每行尾部 `×` 删除当前信号行
-- 侧边栏高级选项带鼠标悬停说明
-- Wave 类型选择带小波形示例，便于理解当前周期形状
-- 节点编辑改为当前选中周期的节点字母，连线可通过起点/线型/终点/文字 UI 添加和删除
-- 左侧参数栏和右侧预览区独立滚动，调整参数时预览不会跟着跑
-- 支持添加 Step 7 里的 error/warning/info/success/muted 富文本到标题或页脚
-- 教程示例：内置 `tutorial.html` 的 14 个 WaveDrom 示例入口，覆盖 signal、clock、bus、gap、group、period/phase、hscale、skin、head/foot、node/edge、代码生成
-- 撤销/重做
-- 导出 WaveJSON（官网教程同款 JavaScript 对象语法）
-- 导出 SVG
-- 导出 PNG
-- 导入 WaveJSON（支持官网教程语法、严格 JSON、JSON5 风格对象字面量）
-- WaveDrom CDN 渲染，失败时使用内置 SVG 预览兜底
-- 白色/深色主题切换
+## 主要功能
 
-## 预览说明
+- 可视化编辑信号行和每个时钟周期。
+- 支持 WaveDrom 常用 wave 字符：电平、时钟、数据总线、未知态、高阻、上拉、下拉、断点。
+- 支持数据标签，例如 `ACK`、`0x3A`、`CMD`。
+- 支持多级信号分组，对应 WaveDrom 官方嵌套 `signal` 数组。
+- 支持节点和连线，对应 `node` 与 `edge`。
+- 支持标题、页脚和富文本，包括颜色、字号、粗体、斜体、上下标、装饰线和位置偏移。
+- 支持 `period`、`phase`、`config.hscale`、`config.skin`。
+- 内置 WaveDrom 官网教程示例，可一键载入学习。
+- 支持导入 WaveJSON，导出 WaveJSON、SVG、PNG。
+- 支持中文/英文界面和浅色/深色主题。
 
-实时预览区域右上角会显示当前渲染器：
+## 快速使用
 
-- `WaveDrom 官方渲染`：使用项目内置的官方 `vendor/wavedrom/skins/default.js` 和 `vendor/wavedrom/wavedrom.min.js`，视觉效果以官方 WaveDrom 为准。
-- `本地近似预览`：官方脚本未加载成功时启用，只用于避免空白，不保证和 WaveDrom 完全一致。
+1. 打开网站，点击“快速开始”进入编辑器。
+2. 在上方表格中点击一个周期。
+3. 在左侧“周期”面板选择波形类型，并按需要填写标签文字。
+4. 在“信号分组”“节点与连线”“文字”“外观”等面板补充高级配置。
+5. 在“实时预览”查看官方 WaveDrom 渲染效果。
+6. 用预览窗口导出 SVG/PNG，或用 WaveJSON 窗口导入/导出源文件。
 
-## WaveJSON 与 JSON
+## WaveDrom 语法对应关系
 
-WaveDrom 官网教程里的写法是 WaveJSON/JavaScript 对象字面量，例如：
+| WaveDrom 字段 | 本工具中的位置 |
+| --- | --- |
+| `signal[].name` | 表格左侧信号名称 |
+| `signal[].wave` | 左侧“周期”面板的波形类型 |
+| `signal[].data` | “标签文字”输入框 |
+| `signal[].period` | “周期”输入框 |
+| `signal[].phase` | “相位”输入框 |
+| 嵌套 `signal` 数组 | “信号分组”面板 |
+| `node` / `edge` | “节点与连线”面板 |
+| `head.text` / `foot.text` | “文档”和“文字”面板 |
+| `foot.tock` | “页脚偏移”输入框 |
+| `config.hscale` | “外观”面板的“横向缩放” |
+| `config.skin` | “外观”面板的“皮肤样式” |
+
+## WaveJSON 示例
+
+WaveDrom 官网教程使用的是 JavaScript 对象风格的 WaveJSON，不是严格 JSON。因此未加引号的 key、单引号字符串和尾逗号都可以被官方编辑器接受。本工具也支持这种写法。
 
 ```js
 {
   signal: [
-    { name: 'clk', wave: 'p.....|...' },
+    { name: 'clk', wave: 'Pp........Pp' },
+    { name: 'data', wave: 'x=.=x', data: ['0x3A', 'ACK'] },
+    { name: 'valid', wave: '0.1.0' },
   ],
   head: {
     tick: 0,
-    every: 1
+    every: 1,
   },
 }
 ```
 
-它不是严格 JSON。严格 JSON 必须写成 `"signal"`、`"name"` 这种双引号 key。官方编辑器内部使用 `eval("(" + text + ")")` 解析，因此官网教程写法、单引号、尾逗号都能工作。本原型默认展示和导出官网教程同款 WaveJSON。
+## 本地运行
 
-## 官方资源
+这个项目是纯静态页面，不需要后端服务。直接用浏览器打开 `index.html` 即可。
 
-`vendor/wavedrom` 中的 `wavedrom.min.js` 和 `skins/*.js` 来自官方 `wavedrom-editor-v3.5.0-win-x64` 包，避免 CDN 版本和网络加载差异。
+如果浏览器限制本地文件脚本，也可以用任意静态服务器运行，例如：
 
-## 教程示例 UI 覆盖方式
+```bash
+python -m http.server 8080
+```
 
-侧边栏的“教程示例”可以一键载入官网教程中的全部渲染示例。普通信号行会映射到图形化周期编辑 UI；分组、富文本 head/foot、复杂 arrow、代码生成这类高级示例会保留官方 source 原样渲染，同时尽量把普通 lane 展平到 UI 中查看和继续编辑。编辑任意周期或高级字段后，会切换回当前 UI 可表达的数据结构。
+然后访问 `http://127.0.0.1:8080/`。
 
-## hscale
+## 许可
 
-`config.hscale` 是 WaveDrom 的横向缩放比例。默认 `1`，每个周期使用默认宽度；设为 `2` 时周期宽度约变为两倍，适合波形太密、标签放不下时使用。
+本项目使用 WaveDrom JS，WaveDrom 遵循 MIT License。用户创建和导出的时序图内容归用户所有。
 
-## 后续可接入
+项目反馈与建议请使用 GitHub Issues：
 
-- 真实收款二维码或支付链接
-- 账号系统和云端保存
-- PNG 导出
-- 拖拽调整行顺序和周期位置
-- 更完整的 WaveDrom 语法配置
+[https://github.com/isyefeng/wavedrom-gui/issues](https://github.com/isyefeng/wavedrom-gui/issues)
