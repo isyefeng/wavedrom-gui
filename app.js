@@ -221,7 +221,7 @@ const els = {};
 
 const i18n = {
   zh: {
-    "nav.docs": "说明文档",
+    "nav.docs": "教程",
     "nav.start": "快速开始",
     "nav.support": "作者/支持",
     "nav.donate": "支持作者",
@@ -285,7 +285,7 @@ const i18n = {
     "group.empty": "暂无信号分组",
   },
   en: {
-    "nav.docs": "Docs",
+    "nav.docs": "Tutorial",
     "nav.start": "Start",
     "nav.support": "Author / Support",
     "nav.donate": "Support",
@@ -362,6 +362,7 @@ window.addEventListener("load", () => {
 
 function cacheElements() {
   els.homeView = document.querySelector("#homeView");
+  els.docsView = document.querySelector("#docsView");
   els.editorView = document.querySelector("#editorView");
   els.signalTable = document.querySelector("#signalTable");
   els.wavePreview = document.querySelector("#wavePreview");
@@ -593,10 +594,14 @@ function resetRichToolbar() {
 
 function setView(view) {
   const isEditor = view === "editor";
+  const isDocs = view === "docs";
   document.body.classList.toggle("is-editor-page", isEditor);
-  document.body.classList.toggle("is-home-page", !isEditor);
-  els.homeView.classList.toggle("is-hidden", isEditor);
+  document.body.classList.toggle("is-docs-page", isDocs);
+  document.body.classList.toggle("is-home-page", !isEditor && !isDocs);
+  els.homeView.classList.toggle("is-hidden", isEditor || isDocs);
+  els.docsView.classList.toggle("is-hidden", !isDocs);
   els.editorView.classList.toggle("is-hidden", !isEditor);
+  if (isDocs || view === "home") window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function t(key, params = {}) {

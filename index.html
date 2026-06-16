@@ -22,7 +22,7 @@
       <nav class="nav">
         <button class="nav-home" data-view="home" data-i18n="button.home">主页</button>
         <button class="nav-start" data-start data-i18n="nav.start">快速开始</button>
-        <button data-view="home" data-anchor="docs" data-i18n="nav.docs">说明文档</button>
+        <button data-view="docs" data-i18n="nav.docs">教程</button>
         <button data-donate data-i18n="nav.support">作者/支持</button>
       </nav>
       <div class="top-actions">
@@ -65,9 +65,9 @@
 
         <section class="info-band" id="docs">
           <div>
-            <h2>说明文档</h2>
+            <h2>教程</h2>
             <p>
-              教程将单独整理成独立页面。当前版本可以通过“快速开始”进入编辑器，并在左侧“示例”中载入 WaveDrom 官方教程示例。
+              点击顶部“教程”查看完整 GIF 操作说明。也可以通过“快速开始”进入编辑器，并在左侧“示例”中载入 WaveDrom 官方教程示例。
             </p>
           </div>
           <div>
@@ -79,6 +79,113 @@
             <p>遇到问题可以通过“作者/支持”进入 GitHub Issues 反馈；如果这个工具节省了你的时间，也可以扫码支持项目维护。</p>
           </div>
         </section>
+      </section>
+
+      <section class="docs-view is-hidden" id="docsView">
+        <aside class="docs-sidebar" aria-label="教程目录">
+          <div class="docs-sidebar-title">教程目录</div>
+          <a href="#guide-start">快速上手</a>
+          <a href="#guide-basic">基础编辑</a>
+          <a href="#guide-example">载入示例</a>
+          <a href="#guide-document">文档设置</a>
+          <a href="#guide-cycle">周期设置</a>
+          <a href="#guide-node">节点与连线</a>
+          <a href="#guide-group">信号分组</a>
+          <a href="#guide-style">外观设置</a>
+          <a href="#guide-rich">富文本</a>
+        </aside>
+
+        <article class="docs-content">
+          <header class="docs-header" id="guide-start">
+            <p class="eyebrow">Documentation</p>
+            <h1>WaveDrom GUI 使用教程</h1>
+            <p>
+              本教程按编辑器左侧功能分组编排，配合 GIF 演示说明从创建波形、修改周期到导出 WaveJSON 的常用流程。
+            </p>
+            <div class="docs-actions">
+              <button class="primary" data-start>进入编辑器</button>
+              <a class="doc-link" href="https://wavedrom.com/tutorial.html" target="_blank" rel="noreferrer">WaveDrom 官方教程</a>
+            </div>
+          </header>
+
+          <section class="guide-section" id="guide-basic">
+            <div class="guide-copy">
+              <span class="step-index">01</span>
+              <h2>基础编辑：增加、减少、修改周期和信号</h2>
+              <p>点击表格中的周期后，左侧会显示当前周期的图形、标签、周期和相位。行内按钮用于插入或删除当前信号行，新增内容会立即同步到实时预览和 WaveJSON。</p>
+            </div>
+            <img src="./image/gif教程/1.基础教程-增加，减少，修改周期，删除，增加信号.gif" alt="基础编辑 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-example">
+            <div class="guide-copy">
+              <span class="step-index">02</span>
+              <h2>载入官方教程示例</h2>
+              <p>在“示例”分组中选择 WaveDrom 教程案例，可以快速查看官方语法对应的渲染效果，再继续在 UI 中修改普通信号行。</p>
+            </div>
+            <img src="./image/gif教程/2.基础教程-载入示例.gif" alt="载入示例 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-document">
+            <div class="guide-copy">
+              <span class="step-index">03</span>
+              <h2>文档设置：标题、页脚和撤销</h2>
+              <p>“文档”分组用于设置图形标题和页脚文字，也提供撤销与恢复。标题对应 WaveDrom 的 head.text，页脚对应 foot.text。</p>
+            </div>
+            <img src="./image/gif教程/3.文档.gif" alt="文档设置 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-cycle">
+            <div class="guide-copy">
+              <span class="step-index">04</span>
+              <h2>周期设置：图形、标签、周期和相位</h2>
+              <p>选择数据段或数据样式后，可以填写 ACK、CMD、0x3A 等标签。周期和相位用于控制单条信号的宽度与水平偏移，适合 DDR 或偏移采样时序。</p>
+            </div>
+            <div class="guide-media-grid">
+              <img src="./image/gif教程/4.周期-标签文字.gif" alt="周期标签文字 GIF 演示" loading="lazy" />
+              <img src="./image/gif教程/5.周期-周期，相位.gif" alt="周期和相位 GIF 演示" loading="lazy" />
+            </div>
+          </section>
+
+          <section class="guide-section" id="guide-node">
+            <div class="guide-copy">
+              <span class="step-index">05</span>
+              <h2>节点与连线</h2>
+              <p>先给两个周期添加节点字母，再在线型工具中选择起点、线型、终点和说明文字。导出时会生成 WaveDrom 的 node 和 edge 字段。</p>
+            </div>
+            <img src="./image/gif教程/6.节点与连接.gif" alt="节点与连线 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-group">
+            <div class="guide-copy">
+              <span class="step-index">06</span>
+              <h2>信号分组</h2>
+              <p>信号分组支持多级嵌套，不需要手动输入斜杠。为选中信号添加层级后，导出的 WaveJSON 会保持 WaveDrom 官方嵌套 signal 数组结构。</p>
+            </div>
+            <img src="./image/gif教程/7.信号分组.gif" alt="信号分组 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-style">
+            <div class="guide-copy">
+              <span class="step-index">07</span>
+              <h2>外观设置</h2>
+              <p>“横向缩放”对应 config.hscale，用来拉宽每个周期；“皮肤样式”对应 config.skin，可以切换 WaveDrom 官方皮肤。</p>
+            </div>
+            <img src="./image/gif教程/8.外观.gif" alt="外观设置 GIF 演示" loading="lazy" />
+          </section>
+
+          <section class="guide-section" id="guide-rich">
+            <div class="guide-copy">
+              <span class="step-index">08</span>
+              <h2>富文本：预设主题和自定义字体</h2>
+              <p>富文本支持官方教程中的 error、warning、info、success、muted 预设，也支持自由设置颜色、字号、粗体、斜体、上下标、装饰线和上下偏移。</p>
+            </div>
+            <div class="guide-media-grid">
+              <img src="./image/gif教程/8.富文本-预设主题.gif" alt="富文本预设主题 GIF 演示" loading="lazy" />
+              <img src="./image/gif教程/9.富文本-自定义字体.gif" alt="富文本自定义字体 GIF 演示" loading="lazy" />
+            </div>
+          </section>
+        </article>
       </section>
 
       <section class="editor-view is-hidden" id="editorView">
